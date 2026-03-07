@@ -1,6 +1,7 @@
 """
 Фикстуры для тестирования CoolCare API.
 Используется FastAPI TestClient для отправки запросов без запуска сервера.
+Тестовые пользователи автоматически удаляются после завершения тестов.
 """
 import sys
 import os
@@ -11,6 +12,9 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from fastapi.testclient import TestClient
 from main import app
+
+# Префикс тестовых телефонов — для автоочистки
+TEST_PHONE_PREFIX = "+7000000000"
 
 
 @pytest.fixture(scope="session")
@@ -65,3 +69,26 @@ def admin_headers(client):
     token = resp.json()["access_token"]
 
     return {"Authorization": f"Bearer {token}"}
+
+
+def pytest_sessionfinish(session, exitstatus):
+    """Автоочистка: удаляем ВСЕХ тестовых пользователей и их заявки после тестов."""
+    try:
+        from database import supabase
+
+        # Находим всех тестовых пользователей (телефон начинается с +7000000000)
+        result = supabase.table("users").select("id, phone").like("phone", "+7000000000%").execute()
+        test_users = result.data or []
+
+        if not test_users:
+            return
+
+        for user in test_users:
+            # Удаляем заявки тестового пользователя
+            supabase.table("jobs").delete().eq("user_id", user["id"]).execute()
+            # Удаляем самого пользователя
+            supabase.table("users").delete().eq("id", user["id"]).execute()
+
+        print(f"\n🧹 Очистка: удалено {len(test_users)} тестовых пользователей")
+    except Exception as e:
+        print(f"\n⚠️ Ошибка очистки тестовых данных: {e}")
