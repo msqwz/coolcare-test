@@ -78,6 +78,15 @@ if [ ! -f "frontend/.env" ]; then
     fi
 fi
 
+# Dispatcher .env
+if [ ! -f "dispatcher/.env" ]; then
+    if [ -f "dispatcher/.env.example" ]; then
+        echo "⚠️  dispatcher/.env не найден! Копируем из .env.example..."
+        cp dispatcher/.env.example dispatcher/.env
+        echo "❗ Проверьте dispatcher/.env!"
+    fi
+fi
+
 # === 3. Обработать локальные изменения перед pull ===
 echo "🔍 Проверка локальных изменений..."
 
