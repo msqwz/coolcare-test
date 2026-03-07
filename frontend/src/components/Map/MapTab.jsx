@@ -14,6 +14,7 @@ export function MapTab({ jobs }) {
   const [routeDate, setRouteDate] = useState(() => toDateStr(new Date()))
   const [activeTypes, setActiveTypes] = useState(() => JOB_TYPE_LIST.map((t) => t.key))
   const [showFilters, setShowFilters] = useState(false)
+  const [isMapReady, setIsMapReady] = useState(false)
 
   useEffect(() => {
     loadYandexMaps().then(() => {
@@ -23,6 +24,7 @@ export function MapTab({ jobs }) {
         zoom: 11,
         controls: ['zoomControl', 'fullscreenControl'],
       })
+      setIsMapReady(true)
     })
   }, [])
 
@@ -94,7 +96,7 @@ export function MapTab({ jobs }) {
     } else if (jobsWithCoords.length === 1) {
       mapInstance.current.setCenter([jobsWithCoords[0].latitude, jobsWithCoords[0].longitude], 14)
     }
-  }, [jobsWithCoords])
+  }, [jobsWithCoords, isMapReady])
 
   return (
     <div className="tab map-tab-modern animate-fade-in">
