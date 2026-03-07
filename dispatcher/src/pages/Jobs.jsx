@@ -29,34 +29,44 @@ function JobModal({ job, workers, onClose, onSave }) {
         api.getPredefinedServices().then(setPredefinedServices).catch(console.error)
     }, [])
 
+    const calcTotal = (services) => {
+        return services.reduce((sum, s) => sum + (parseFloat(s.price) || 0) * (parseInt(s.quantity) || 1), 0)
+    }
+
     const handleSelectPredefined = (serviceId) => {
         if (!serviceId) return
         const service = predefinedServices.find(s => s.id === parseInt(serviceId))
         if (service) {
+            const newServices = [...(formData.services || []), { description: service.name, price: service.price, quantity: 1 }]
             setFormData({
                 ...formData,
-                services: [...(formData.services || []), { description: service.name, price: service.price, quantity: 1 }]
+                services: newServices,
+                price: calcTotal(newServices)
             })
         }
     }
 
     const addService = () => {
+        const newServices = [...(formData.services || []), { description: '', price: '', quantity: 1 }]
         setFormData({
             ...formData,
-            services: [...(formData.services || []), { description: '', price: '', quantity: 1 }]
+            services: newServices,
+            price: calcTotal(newServices)
         })
     }
 
     const handleServiceChange = (index, field, value) => {
         const list = [...(formData.services || [])]
         list[index][field] = value
-        setFormData({ ...formData, services: list })
+        setFormData({ ...formData, services: list, price: calcTotal(list) })
     }
 
     const removeService = (index) => {
+        const newServices = (formData.services || []).filter((_, i) => i !== index)
         setFormData({
             ...formData,
-            services: (formData.services || []).filter((_, i) => i !== index)
+            services: newServices,
+            price: calcTotal(newServices)
         })
     }
 

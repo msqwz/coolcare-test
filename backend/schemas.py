@@ -37,6 +37,7 @@ class UserBase(BaseModel):
     is_active: Optional[bool] = True
     latitude: Optional[float] = None
     longitude: Optional[float] = None
+    telegram_chat_id: Optional[str] = None
 
 class UserCreate(UserBase):
     pass
@@ -48,6 +49,7 @@ class UserUpdate(BaseModel):
     is_active: Optional[bool] = None
     latitude: Optional[float] = None
     longitude: Optional[float] = None
+    telegram_chat_id: Optional[str] = None
 
 class UserResponse(UserBase):
     id: int
@@ -56,6 +58,7 @@ class UserResponse(UserBase):
     role: str
     latitude: Optional[float] = None
     longitude: Optional[float] = None
+    telegram_chat_id: Optional[str] = None
     created_at: datetime
     class Config:
         from_attributes = True

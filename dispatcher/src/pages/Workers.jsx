@@ -9,7 +9,7 @@ export function Workers() {
     const [searchTerm, setSearchTerm] = useState('')
     const [loadingId, setLoadingId] = useState(null)
     const [isAddModalOpen, setIsAddModalOpen] = useState(false)
-    const [formData, setFormData] = useState({ name: '', phone: '', role: 'master' })
+    const [formData, setFormData] = useState({ name: '', phone: '', role: 'master', telegram_chat_id: '' })
 
     const filteredWorkers = (workers || []).filter(w =>
         (w.name?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
@@ -67,7 +67,7 @@ export function Workers() {
             const newWorker = await api.createWorker({ ...formData, phone })
             setWorkers(prev => [newWorker, ...prev])
             setIsAddModalOpen(false)
-            setFormData({ name: '', phone: '', role: 'master' })
+            setFormData({ name: '', phone: '', role: 'master', telegram_chat_id: '' })
         } catch (e) {
             alert('Ошибка при создании: ' + e.message)
         } finally {
@@ -144,7 +144,12 @@ export function Workers() {
                                         </div>
                                     </div>
                                 </td>
-                                <td style={{ fontWeight: '500' }}>{w.phone}</td>
+                                <td>
+                                    <div style={{ fontWeight: '500' }}>{w.phone}</div>
+                                    {w.telegram_chat_id && (
+                                        <div style={{ fontSize: '0.7rem', color: '#0088cc', marginTop: '4px', fontWeight: '600' }}>✈️ Telegram</div>
+                                    )}
+                                </td>
                                 <td>
                                     <span style={{
                                         padding: '6px 12px',
@@ -254,6 +259,16 @@ export function Workers() {
                                         <option value="master">Мастер</option>
                                         <option value="admin">Администратор</option>
                                     </select>
+                                </div>
+                                <div className="input-group">
+                                    <label>Telegram Chat ID</label>
+                                    <input
+                                        type="text"
+                                        placeholder="Например: 123456789"
+                                        value={formData.telegram_chat_id}
+                                        onChange={e => setFormData({ ...formData, telegram_chat_id: e.target.value })}
+                                    />
+                                    <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '4px' }}>Мастер должен написать /start вашему боту, чтобы получить Chat ID</span>
                                 </div>
 
                                 <button
