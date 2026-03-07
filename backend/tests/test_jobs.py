@@ -107,4 +107,4 @@ class TestJobsErrors:
     def test_unauthorized_access(self, client):
         """Доступ без токена должен быть запрещён."""
         resp = client.get("/jobs")
-        assert resp.status_code == 403
+        assert resp.status_code == 401

@@ -55,9 +55,9 @@ class TestProfile:
         assert resp.json()["name"] == "Тестовый"
 
     def test_unauthorized_me(self, client):
-        """GET /auth/me без токена должен вернуть 403."""
+        """GET /auth/me без токена должен вернуть 401."""
         resp = client.get("/auth/me")
-        assert resp.status_code == 403
+        assert resp.status_code == 401
 
 
 class TestRefreshToken:
