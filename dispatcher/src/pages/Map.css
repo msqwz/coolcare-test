@@ -1,0 +1,286 @@
+/* ===== MAP V4 — STATIC PANEL LAYOUT ===== */
+
+.map-v4-layout {
+    display: flex;
+    height: calc(100vh - var(--topbar-height) - 40px);
+    gap: 0;
+    border-radius: 20px;
+    overflow: hidden;
+    background: #e5e7eb;
+}
+
+/* Left panel */
+.map-v4-panel {
+    width: 280px;
+    min-width: 280px;
+    background: var(--white);
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    border-right: 1px solid var(--border-color);
+    overflow: hidden;
+}
+
+.map-panel-title {
+    margin: 0 0 16px;
+    font-size: 1.1rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--text-main);
+}
+
+/* View mode switcher */
+.map-view-switcher {
+    display: flex;
+    background: rgba(0, 0, 0, 0.04);
+    padding: 3px;
+    border-radius: 10px;
+    margin-bottom: 14px;
+}
+
+.map-view-switcher button {
+    flex: 1;
+    border: none;
+    background: transparent;
+    padding: 6px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    border-radius: 8px;
+    cursor: pointer;
+    color: var(--text-muted);
+    transition: all 0.2s;
+    font-family: inherit;
+}
+
+.map-view-switcher button.active {
+    background: white;
+    color: var(--primary);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* Status filter chips */
+.map-status-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-bottom: 14px;
+}
+
+.map-status-chip {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 9px;
+    border: 1.5px solid var(--border-color);
+    border-radius: 8px;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 0.65rem;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.2s;
+}
+
+.map-status-chip.on {
+    border-color: var(--chip-color);
+    background: color-mix(in srgb, var(--chip-color) 8%, transparent);
+    color: var(--chip-color);
+}
+
+.chip-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--chip-color);
+    flex-shrink: 0;
+}
+
+.map-status-chip:not(.on) .chip-dot {
+    opacity: 0.3;
+}
+
+.chip-count {
+    font-size: 0.6rem;
+    font-weight: 800;
+    opacity: 0.6;
+}
+
+/* Search */
+.map-search-box {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    margin-bottom: 14px;
+    border-radius: 10px;
+    background: rgba(0, 0, 0, 0.03);
+    border: 1px solid var(--border-color);
+}
+
+.map-search-box input {
+    border: none;
+    background: transparent;
+    font-size: 0.82rem;
+    width: 100%;
+    outline: none;
+    font-family: inherit;
+}
+
+/* Master list */
+.map-list-scroll {
+    flex: 1;
+    overflow-y: auto;
+    margin-bottom: 12px;
+}
+
+.list-section-title {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    margin: 0 0 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 800;
+}
+
+.map-worker-card {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    border-radius: 12px;
+    cursor: pointer;
+    margin-bottom: 4px;
+    transition: all 0.2s;
+    border: 1px solid transparent;
+}
+
+.map-worker-card:hover {
+    background: rgba(37, 99, 235, 0.04);
+    border-color: var(--border-color);
+}
+
+.worker-avatar-mini {
+    width: 30px;
+    height: 30px;
+    background: var(--primary);
+    color: white;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 0.7rem;
+    flex-shrink: 0;
+}
+
+.worker-info-mini {
+    flex: 1;
+    min-width: 0;
+}
+
+.worker-name-mini {
+    font-size: 0.78rem;
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.worker-status-mini {
+    font-size: 0.62rem;
+    font-weight: 600;
+}
+
+.locate-icon {
+    margin-left: auto;
+    opacity: 0;
+    transition: opacity 0.2s;
+    color: var(--primary);
+    flex-shrink: 0;
+}
+
+.map-worker-card:hover .locate-icon {
+    opacity: 1;
+}
+
+/* Stats footer */
+.map-stats-footer {
+    display: flex;
+    gap: 8px;
+    padding: 12px;
+    border-radius: 12px;
+    background: rgba(0, 0, 0, 0.03);
+}
+
+.map-stat-item {
+    flex: 1;
+    text-align: center;
+}
+
+.stat-val {
+    display: block;
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--primary);
+}
+
+.stat-lbl {
+    font-size: 0.58rem;
+    color: var(--text-muted);
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+/* Map area */
+.map-v4-map-area {
+    flex: 1;
+    position: relative;
+    min-width: 0;
+}
+
+.map-v4-canvas {
+    width: 100%;
+    height: 100%;
+}
+
+.map-v4-controls {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    z-index: 100;
+}
+
+.control-btn {
+    width: 38px;
+    height: 38px;
+    border: none;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--text-main);
+    transition: all 0.2s;
+}
+
+.control-btn:hover {
+    background: white !important;
+    color: var(--primary);
+    transform: scale(1.05);
+}
+
+/* Balloons */
+.map-balloon {
+    padding: 8px;
+    font-family: 'Inter', sans-serif;
+}
+
+.text-orange { color: #f59e0b; }
+.text-blue { color: #3b82f6; }

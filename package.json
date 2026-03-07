@@ -1,0 +1,10 @@
+{
+  "name": "coolcare-root",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "cd frontend && npm run build && cd ../dispatcher && npm run build",
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev:dispatcher": "cd dispatcher && npm run dev",
+    "server": "python backend/main.py"
+  }
+}

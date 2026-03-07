@@ -1,0 +1,35 @@
+@import './styles/theme.css';
+@import './styles/Buttons.css';
+@import './styles/Navigation.css';
+@import './styles/Tabs.css';
+@import './styles/Login.css';
+@import './styles/Home.css';
+@import './styles/JobCard.css';
+@import './styles/JobDetail.css';
+@import './styles/Calendar.css';
+@import './styles/Offline.css';
+@import './styles/Forms.css';
+@import './styles/Map.css';
+
+/* Global utilities that didn't fit elsewhere */
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  font-size: 1rem;
+  color: var(--gray-color)
+}
+
+.debug-code {
+  background: #e8f4fd;
+  padding: 12px;
+  border-radius: 10px;
+  text-align: center;
+  border: 1px solid #b3d9ff
+}
+
+.debug-code strong {
+  color: var(--primary-color);
+  font-size: 1.1rem
+}

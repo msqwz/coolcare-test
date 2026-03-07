@@ -1,0 +1,97 @@
+.btn-primary {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: opacity 0.2s, background 0.2s
+}
+
+.btn-primary:hover {
+    opacity: 0.9;
+    background: #0059b3
+}
+
+.btn-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed
+}
+
+.btn-secondary {
+    background: var(--gray-color);
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer
+}
+
+.btn-link {
+    background: none;
+    border: none;
+    color: var(--primary-color);
+    cursor: pointer;
+    font-size: 0.85rem;
+    text-decoration: underline
+}
+
+.btn-small {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: opacity 0.2s
+}
+
+.btn-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: var(--gray-color);
+    cursor: pointer;
+    padding: 4px 8px;
+    transition: color 0.2s
+}
+
+.btn-close:hover {
+    color: var(--text-color)
+}
+
+.btn-map-select {
+    background: var(--bg-color);
+    border: 1px solid var(--border-color);
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap
+}
+
+.pull-spinner {
+    width: 32px;
+    height: 32px;
+    color: var(--primary-color)
+}
+
+.pull-spinner.spinning {
+    animation: rotate 1s linear infinite
+}
+
+@keyframes rotate {
+    from {
+        transform: rotate(0deg)
+    }
+
+    to {
+        transform: rotate(360deg)
+    }
+}

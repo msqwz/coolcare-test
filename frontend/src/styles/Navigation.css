@@ -1,0 +1,141 @@
+.app {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column
+}
+
+.app-header {
+    background: var(--card-bg);
+    padding: 14px 20px;
+    box-shadow: var(--shadow);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    padding-top: max(14px, env(safe-area-inset-top));
+}
+
+@media screen and (display-mode: standalone) {
+    .app-header {
+        padding-top: max(50px, env(safe-area-inset-top));
+    }
+}
+
+@supports (-webkit-touch-callout: none) {
+    .app-header {
+        padding-top: max(50px, env(safe-area-inset-top));
+    }
+}
+
+.app-header h1 {
+    font-size: 1.25rem;
+    color: var(--primary-color);
+    font-weight: 500;
+    margin: 0;
+}
+
+.header-with-back {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.header-with-back h1 {
+    margin: 0;
+}
+
+.btn-back {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-color);
+    border-radius: 8px;
+    transition: background 0.2s;
+}
+
+.btn-back:hover {
+    background: var(--bg-color);
+}
+
+.btn-back svg {
+    width: 24px;
+    height: 24px;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 12px
+}
+
+.user-info span {
+    font-size: 0.85rem;
+    color: var(--gray-color)
+}
+
+.app-main {
+    flex: 1;
+    padding: 16px;
+    padding-bottom: 70px
+}
+
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--card-bg);
+    display: flex;
+    justify-content: space-around;
+    padding: 8px 0 12px;
+    box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.08);
+    z-index: 100
+}
+
+.nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 8px 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+    flex: 1
+}
+
+.nav-item.active {
+    color: var(--primary-color)
+}
+
+.nav-item:hover {
+    color: var(--primary-color)
+}
+
+.nav-icon {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center
+}
+
+.nav-icon svg {
+    width: 28px;
+    height: 28px
+}
+
+.nav-item.active .nav-icon svg {
+    stroke: var(--primary-color);
+    stroke-width: 2
+}
+
+.nav-label {
+    font-size: 0.75rem;
+    font-weight: 400
+}

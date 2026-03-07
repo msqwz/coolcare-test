@@ -1,0 +1,41 @@
+# === Python / Backend ===
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+venv/
+.env
+*.db
+*.sqlite3
+*.log
+app.pid
+
+# === Node.js / Frontend ===
+node_modules/
+frontend/dist/
+frontend/node_modules/
+dispatcher/dist/
+dispatcher/node_modules/
+
+# === Build artifacts ===
+dist/
+build/
+*.egg-info/
+
+# === System files ===
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# === IDE ===
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# === Temporary files ===
+*.tmp
+*.temp
+.cache/

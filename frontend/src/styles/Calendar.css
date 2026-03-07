@@ -1,0 +1,309 @@
+.calendar-tab {
+    padding: 16px;
+    padding-bottom: 100px;
+}
+
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.calendar-header h2 {
+    font-size: 1.5rem;
+    font-weight: 500;
+    margin: 0;
+}
+
+.calendar-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    padding: 12px;
+    background: var(--card-bg);
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    gap: 12px;
+    flex: 1;
+}
+
+.calendar-nav .calendar-date-label {
+    flex: 1;
+    text-align: center;
+}
+
+.btn-calendar-nav {
+    padding: 8px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-color);
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    transition: background 0.2s;
+}
+
+.btn-calendar-nav:hover {
+    background: var(--bg-color);
+}
+
+.calendar-date-label {
+    font-weight: 500;
+    font-size: 0.95rem;
+    text-transform: capitalize;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 6px;
+    color: var(--primary-color);
+}
+
+.calendar-date-label:hover {
+    background: rgba(0, 102, 204, 0.1);
+}
+
+.view-mode-toggle {
+    display: flex;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 16px;
+}
+
+.view-mode-toggle button {
+    flex: 1;
+    padding: 8px 12px;
+    background: none;
+    border: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: var(--gray-color);
+}
+
+.view-mode-toggle button.active {
+    background: var(--primary-color);
+    color: white;
+}
+
+.calendar-month-grid {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 6px;
+    margin-bottom: 12px;
+}
+
+.calendar-month-weekday {
+    text-align: center;
+    color: var(--gray-color);
+    font-size: 0.75rem;
+    font-weight: 500;
+    padding: 4px 0;
+}
+
+.calendar-month-day {
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    background: var(--card-bg);
+    min-height: 54px;
+    padding: 6px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: flex-start;
+    cursor: pointer;
+}
+
+.calendar-month-day small {
+    font-size: 0.7rem;
+    color: var(--primary-color);
+}
+
+.calendar-month-day.outside {
+    opacity: 0.45;
+}
+
+.calendar-month-day.selected {
+    border-color: var(--primary-color);
+    box-shadow: inset 0 0 0 1px var(--primary-color);
+}
+
+.calendar-month-day.today {
+    background: rgba(0, 102, 204, 0.15);
+}
+
+.calendar-month-day.weekend {
+    background: rgba(220, 53, 69, 0.15);
+}
+
+.calendar-month-day.workday {
+    background: rgba(40, 167, 69, 0.15);
+}
+
+.view-mode-toggle {
+    display: flex;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 16px;
+}
+
+.view-mode-toggle button {
+    flex: 1;
+    padding: 8px 12px;
+    background: none;
+    border: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: var(--gray-color);
+}
+
+.view-mode-toggle button.active {
+    background: var(--primary-color);
+    color: white;
+}
+
+.calendar-day-type-toggle {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: var(--card-bg);
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    margin-top: 12px;
+}
+
+.calendar-day-label-selected {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text-color);
+    white-space: nowrap;
+}
+
+.calendar-day-type-buttons {
+    display: flex;
+    gap: 6px;
+    flex: 1;
+}
+
+.calendar-day-type-buttons button {
+    flex: 1;
+    padding: 10px 12px;
+    border: none;
+    border-radius: 10px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: white;
+}
+
+.calendar-day-type-buttons button:first-child {
+    background: #28a745;
+}
+
+.calendar-day-type-buttons button:first-child:hover {
+    background: #218838;
+}
+
+.calendar-day-type-buttons button:first-child.active {
+    box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.3);
+}
+
+.calendar-day-type-buttons button:last-child {
+    background: #dc3545;
+}
+
+.calendar-day-type-buttons button:last-child:hover {
+    background: #c82333;
+}
+
+.calendar-day-type-buttons button:last-child.active {
+    box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.3);
+}
+
+.calendar-week-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.calendar-week-day-block {
+    background: var(--card-bg);
+    border-radius: 12px;
+    padding: 10px 12px;
+    box-shadow: var(--shadow);
+}
+
+.calendar-week-day-block.today {
+    border-left: 4px solid var(--primary-color);
+}
+
+.calendar-week-day-header {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-muted, #6b7280);
+    margin-bottom: 6px;
+    text-transform: capitalize;
+}
+
+.calendar-week-day-jobs {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+/* Compact job row for week view */
+.week-job-compact {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 8px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.week-job-compact:hover {
+    background: var(--bg-surface, #f1f5f9);
+}
+
+.week-job-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.week-job-name {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text-color);
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.week-job-time {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--text-muted, #6b7280);
+    white-space: nowrap;
+    flex-shrink: 0;
+}

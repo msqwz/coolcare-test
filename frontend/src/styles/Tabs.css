@@ -1,0 +1,144 @@
+/* ============================================
+   Tabs Styles - Mobile First
+   ============================================ */
+
+.tab {
+    animation: fadeIn 0.3s
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px)
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0)
+    }
+}
+
+.tab-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px
+}
+
+.tab-header h2 {
+    font-size: 1.25rem;
+    font-weight: 500;
+    margin: 0;
+}
+
+.tab-header .btn-add {
+    padding: 8px 16px;
+    font-size: 0.85rem;
+    border-radius: 10px;
+}
+
+.empty {
+    text-align: center;
+    color: var(--gray-color);
+    padding: 40px 20px;
+    font-size: 0.95rem
+}
+
+/* Поиск и фильтр по типу */
+.jobs-search {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+    align-items: stretch;
+    width: 100%;
+}
+
+.jobs-search-input {
+    flex: 1;
+    min-width: 0;
+    padding: 8px 12px;
+    font-size: 0.85rem;
+    border-radius: 8px;
+}
+
+.jobs-type-filter {
+    width: 120px;
+    max-width: 120px;
+    flex-shrink: 0;
+    padding: 8px 6px;
+    font-size: 0.7rem;
+    border-radius: 8px;
+}
+
+/* Фильтры по статусу */
+.filter-bar {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 12px;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 4px;
+}
+
+.filter-bar button {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    padding: 8px 14px;
+    border-radius: 16px;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-weight: 400;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.filter-bar button.active {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color)
+}
+
+.jobs-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* Планшеты и десктопы */
+@media (min-width: 768px) {
+    .tab-header {
+        margin-bottom: 16px;
+    }
+    
+    .tab-header h2 {
+        font-size: 1.5rem;
+    }
+    
+    .tab-header .btn-add {
+        padding: 10px 20px;
+        font-size: 0.95rem;
+    }
+    
+    .jobs-search-input {
+        padding: 10px 14px;
+        font-size: 0.95rem;
+    }
+    
+    .jobs-type-filter {
+        width: 160px;
+        padding: 10px 12px;
+        font-size: 0.9rem;
+    }
+    
+    .filter-bar {
+        gap: 8px;
+        margin-bottom: 16px;
+    }
+    
+    .filter-bar button {
+        padding: 8px 14px;
+        font-size: 0.85rem;
+    }
+}

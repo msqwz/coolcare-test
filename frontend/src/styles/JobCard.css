@@ -1,0 +1,232 @@
+/* JobCard.css */
+
+.job-card-modern {
+    background: var(--card-bg);
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    cursor: pointer;
+    transition: all 0.25s ease;
+    padding: 16px;
+    border: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    position: relative;
+}
+
+[data-theme='dark'] .job-card-modern {
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: rgba(30, 41, 59, 0.8);
+}
+
+.job-card-modern:hover {
+    box-shadow: 0 8px 20px -6px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+    border-color: var(--primary-color);
+}
+
+.job-card-modern:active {
+    transform: translateY(0) scale(0.98);
+}
+
+.job-card-header-modern {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.job-card-tags-modern {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.job-card-tag-modern {
+    padding: 3px 10px;
+    border-radius: 8px;
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    line-height: 1.5;
+}
+
+.job-card-type-modern {
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: var(--text-muted, #6b7280);
+    background: var(--bg-surface, #f1f5f9);
+    padding: 3px 10px;
+    border-radius: 8px;
+    flex-shrink: 0;
+}
+
+.job-card-title-modern {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: var(--text-color);
+    margin: 0;
+    letter-spacing: -0.01em;
+}
+
+.job-card-info-modern {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.job-card-info-row-modern {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    font-size: 0.82rem;
+}
+
+.job-card-info-icon-modern {
+    color: var(--primary-color);
+    opacity: 0.7;
+    margin-top: 2px;
+    flex-shrink: 0;
+}
+
+.job-card-info-text-modern {
+    color: var(--text-muted, #6b7280);
+    font-weight: 500;
+    line-height: 1.4;
+}
+
+/* ============================== */
+/* === Address Hyperlink Style == */
+/* ============================== */
+
+.job-card-address-link {
+    color: #3b82f6;
+    font-size: 0.82rem;
+    font-weight: 600;
+    text-decoration: none;
+    line-height: 1.4;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: opacity 0.2s;
+}
+
+.job-card-address-link:hover {
+    opacity: 0.7;
+    text-decoration: underline;
+}
+
+.address-link-arrow {
+    opacity: 0.5;
+    flex-shrink: 0;
+}
+
+/* Footer */
+.job-card-footer-modern {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 10px;
+    border-top: 1px solid var(--border-color);
+}
+
+.job-card-price-modern {
+    display: flex;
+    flex-direction: column;
+}
+
+.price-label {
+    font-size: 0.62rem;
+    color: var(--text-muted, #6b7280);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.price-value {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: var(--text-color);
+}
+
+/* ================================= */
+/* === Status Section Inside Card === */
+/* ================================= */
+
+.job-card-status-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px;
+    background: var(--bg-surface, #f8fafc);
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+}
+
+.status-section-label {
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: var(--text-muted, #6b7280);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.job-card-status-buttons {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.status-btn {
+    flex: 1;
+    min-width: 0;
+    padding: 8px 6px;
+    border-radius: 10px;
+    border: 1.5px solid var(--border-color);
+    background: transparent;
+    font-size: 0.68rem;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+    white-space: nowrap;
+    letter-spacing: 0.02em;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+}
+
+.status-btn-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.status-btn:hover {
+    border-color: var(--btn-color);
+    background: color-mix(in srgb, var(--btn-color) 8%, transparent);
+    color: var(--btn-color) !important;
+}
+
+.status-btn-active {
+    font-weight: 800;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+}
+
+.status-btn:active {
+    transform: scale(0.95);
+}
+
+.status-btn-disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.status-btn-locked {
+    cursor: default;
+}
