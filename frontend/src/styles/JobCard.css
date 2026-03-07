@@ -12,10 +12,6 @@
     flex-direction: column;
     gap: 16px;
     position: relative;
-    transform: translateZ(0);
-    will-change: transform;
-    backface-visibility: hidden;
-    touch-action: pan-y;
 }
 
 [data-theme='dark'] .job-card-modern {
