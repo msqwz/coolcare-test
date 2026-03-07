@@ -4,7 +4,8 @@ import { DEFAULT_CENTER, STATUS_LIST, JOB_TYPE_LIST } from '../../constants'
 import { Calendar, Map as MapIcon, Ghost, Filter } from 'lucide-react'
 
 function toDateStr(d) {
-  return d.toISOString().slice(0, 10)
+  const pad = (n) => n.toString().padStart(2, '0')
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
 }
 
 export function MapTab({ jobs }) {
