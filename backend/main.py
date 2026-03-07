@@ -47,6 +47,14 @@ async def lifespan(app: FastAPI):
         print("⚠️  push_service not found, skipping reminder loop")
     except Exception as e:
         print(f"⚠️  Error starting reminder loop: {e}")
+        
+    try:
+        from telegram_bot import setup_webhook
+        # Используем основной домен для вебхуков
+        setup_webhook("https://plus-cool.ru")
+    except Exception as e:
+        print(f"⚠️  Error setting up Telegram webhook: {e}")
+        
     yield
 
 
@@ -67,6 +75,9 @@ app.include_router(dashboard_router)
 app.include_router(jobs_router)
 app.include_router(admin_router)
 app.include_router(push_router)
+
+from routers.bot_router import router as bot_router
+app.include_router(bot_router)
 
 # === Пути к фронтенду ===
 FRONTEND_DIST = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'frontend', 'dist')

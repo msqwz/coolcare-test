@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { useAdmin } from '../context/AdminContext'
 import { api } from '../api'
-import { Search, UserCheck, UserX, Shield, ShieldOff, Trash2, Plus, X, Save } from 'lucide-react'
+import { Search, UserCheck, UserX, Shield, ShieldOff, Trash2, Plus, X, Save, Edit2 } from 'lucide-react'
 import { Portal } from '../components/Portal'
 
 export function Workers() {
@@ -9,6 +9,8 @@ export function Workers() {
     const [searchTerm, setSearchTerm] = useState('')
     const [loadingId, setLoadingId] = useState(null)
     const [isAddModalOpen, setIsAddModalOpen] = useState(false)
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+    const [editingWorker, setEditingWorker] = useState(null)
     const [formData, setFormData] = useState({ name: '', phone: '', role: 'master', telegram_chat_id: '' })
 
     const filteredWorkers = (workers || []).filter(w =>
@@ -70,6 +72,35 @@ export function Workers() {
             setFormData({ name: '', phone: '', role: 'master', telegram_chat_id: '' })
         } catch (e) {
             alert('Ошибка при создании: ' + e.message)
+        } finally {
+            setLoadingId(null)
+        }
+    }
+
+    const openEditModal = (worker) => {
+        setEditingWorker(worker)
+        setFormData({
+            name: worker.name || '',
+            phone: worker.phone || '',
+            role: worker.role || 'master',
+            telegram_chat_id: worker.telegram_chat_id || ''
+        })
+        setIsEditModalOpen(true)
+    }
+
+    const handleEditSubmit = async (e) => {
+        e.preventDefault()
+        try {
+            setLoadingId(editingWorker.id)
+            let phone = formData.phone
+            if (!phone.startsWith('+')) phone = '+' + phone.replace(/\D/g, '')
+
+            const updatedWorker = await api.updateWorker(editingWorker.id, { ...formData, phone })
+            setWorkers(prev => prev.map(w => w.id === editingWorker.id ? { ...w, ...formData, phone } : w))
+            setIsEditModalOpen(false)
+            setEditingWorker(null)
+        } catch (e) {
+            alert('Ошибка при сохранении: ' + e.message)
         } finally {
             setLoadingId(null)
         }
@@ -180,6 +211,14 @@ export function Workers() {
                                 <td style={{ textAlign: 'right' }}>
                                     <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
                                         <button
+                                            className="icon-btn info glass"
+                                            title="Редактировать"
+                                            onClick={() => openEditModal(w)}
+                                            disabled={loadingId === w.id}
+                                        >
+                                            <Edit2 size={18} />
+                                        </button>
+                                        <button
                                             className={`icon-btn ${w.role === 'admin' ? 'warning' : 'info'} glass`}
                                             title={w.role === 'admin' ? 'Сделать мастером' : 'Сделать админом'}
                                             onClick={() => handleToggleRole(w)}
@@ -278,6 +317,74 @@ export function Workers() {
                                     disabled={loadingId === 'new'}
                                 >
                                     {loadingId === 'new' ? 'Добавление...' : <><Save size={20} /> Сохранить</>}
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </Portal>
+            )}
+
+            {isEditModalOpen && (
+                <Portal>
+                    <div className="modal-overlay" onClick={() => setIsEditModalOpen(false)}>
+                        <div className="modal-container animate-fade-in" onClick={e => e.stopPropagation()} style={{ maxWidth: '400px' }}>
+                            <div className="modal-header">
+                                <div>
+                                    <h3 className="modal-title">Редактирование</h3>
+                                    <p className="modal-subtitle">Изменение данных сотрудника</p>
+                                </div>
+                                <button className="icon-btn glass" onClick={() => setIsEditModalOpen(false)}><X size={20} /></button>
+                            </div>
+
+                            <form onSubmit={handleEditSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginTop: '20px' }}>
+                                <div className="input-group">
+                                    <label>Имя сотрудника</label>
+                                    <input
+                                        type="text"
+                                        placeholder="Например: Иван Иванов"
+                                        value={formData.name}
+                                        onChange={e => setFormData({ ...formData, name: e.target.value })}
+                                    />
+                                </div>
+                                <div className="input-group">
+                                    <label>Телефон</label>
+                                    <input
+                                        type="tel"
+                                        placeholder="+7 (999) 000-00-00"
+                                        required
+                                        value={formData.phone}
+                                        onChange={e => setFormData({ ...formData, phone: e.target.value })}
+                                    />
+                                </div>
+                                <div className="input-group">
+                                    <label>Роль</label>
+                                    <select
+                                        className="admin-select"
+                                        value={formData.role}
+                                        onChange={e => setFormData({ ...formData, role: e.target.value })}
+                                        style={{ width: '100%', marginTop: '8px' }}
+                                    >
+                                        <option value="master">Мастер</option>
+                                        <option value="admin">Администратор</option>
+                                    </select>
+                                </div>
+                                <div className="input-group">
+                                    <label>Telegram Chat ID</label>
+                                    <input
+                                        type="text"
+                                        placeholder="Например: 123456789"
+                                        value={formData.telegram_chat_id || ''}
+                                        onChange={e => setFormData({ ...formData, telegram_chat_id: e.target.value })}
+                                    />
+                                </div>
+
+                                <button
+                                    type="submit"
+                                    className="btn-primary"
+                                    style={{ height: '52px', marginTop: '10px' }}
+                                    disabled={loadingId === editingWorker?.id}
+                                >
+                                    {loadingId === editingWorker?.id ? 'Сохранение...' : <><Save size={20} /> Сохранить</>}
                                 </button>
                             </form>
                         </div>

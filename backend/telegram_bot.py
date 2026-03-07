@@ -36,6 +36,28 @@ def send_telegram_message(chat_id: str, text: str) -> bool:
         return False
 
 
+def setup_webhook(app_url: str) -> bool:
+    """Устанавливает webhook для получения сообщений от Telegram."""
+    if not TELEGRAM_BOT_TOKEN:
+        logger.warning("TELEGRAM_BOT_TOKEN no set, skipping webhook setup.")
+        return False
+
+    try:
+        url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/setWebhook"
+        webhook_url = f"{app_url.rstrip('/')}/bot/webhook"
+        data = json.dumps({"url": webhook_url}).encode("utf-8")
+        
+        req = urllib.request.Request(url, data=data, headers={"Content-Type": "application/json"})
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            if resp.status == 200:
+                logger.info(f"Telegram webhook set to {webhook_url}")
+                return True
+            return False
+    except Exception as e:
+        logger.error(f"Failed to set Telegram webhook: {e}")
+        return False
+
+
 def format_job_message(job: dict) -> str:
     """Форматирует данные заявки в Telegram-сообщение."""
     job_id = job.get("id", "?")
