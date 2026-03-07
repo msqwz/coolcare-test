@@ -12,6 +12,10 @@
     flex-direction: column;
     gap: 16px;
     position: relative;
+    transform: translateZ(0);
+    will-change: transform;
+    backface-visibility: hidden;
+    touch-action: pan-y;
 }
 
 [data-theme='dark'] .job-card-modern {
@@ -27,8 +31,10 @@
     }
 }
 
-.job-card-modern:active {
-    transform: translateY(0) scale(0.98);
+@media (hover: hover) {
+    .job-card-modern:active {
+        transform: translateZ(0) scale(0.98);
+    }
 }
 
 .job-card-header-modern {

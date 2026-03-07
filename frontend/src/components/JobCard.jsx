@@ -2,7 +2,7 @@ import React from 'react'
 import { STATUS_LIST, PRIORITY_LIST, JOB_TYPE_LIST } from '../constants'
 import { MapPin, Clock, ExternalLink } from 'lucide-react'
 
-export function JobCard({ job, onClick, onAddressClick, onStatusChange }) {
+export const JobCard = React.memo(function JobCard({ job, onClick, onAddressClick, onStatusChange }) {
   const statusConfig = STATUS_LIST.find((s) => s.key === job.status) || STATUS_LIST[0]
   const priorityConfig =
     PRIORITY_LIST.find((p) => p.key === (job.priority || 'medium')) || PRIORITY_LIST[1]
@@ -112,4 +112,10 @@ export function JobCard({ job, onClick, onAddressClick, onStatusChange }) {
       </div>
     </div>
   )
-}
+}, (prevProps, nextProps) => {
+  return prevProps.job.id === nextProps.job.id &&
+         prevProps.job.status === nextProps.job.status &&
+         prevProps.job.priority === nextProps.job.priority &&
+         prevProps.job.price === nextProps.job.price &&
+         (prevProps.job.services?.length || 0) === (nextProps.job.services?.length || 0)
+})
