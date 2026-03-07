@@ -108,8 +108,9 @@ cd dispatcher && npm install
 
 | Что | URL |
 |---|---|
-| Сервер (продакшн) | http://82.97.243.212 |
-| Админ-панель (продакшн) | http://82.97.243.212/admin |
+| **Сайт (продакшн)** | https://plus-cool.ru |
+| **Админ-панель (продакшн)** | https://plus-cool.ru/admin |
+| Сервер (IP) | http://82.97.243.212 |
 | Локальный backend | http://localhost:8000 |
 | API Docs (Swagger) | http://localhost:8000/docs |
 | Локальный frontend | http://localhost:5173 |

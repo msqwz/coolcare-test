@@ -6,11 +6,11 @@
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
     cursor: pointer;
     transition: all 0.25s ease;
-    padding: 16px;
+    padding: 20px 16px;
     border: 1px solid var(--border-color);
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 16px;
     position: relative;
 }
 
@@ -33,6 +33,7 @@
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
+    margin-bottom: 4px;
 }
 
 .job-card-tags-modern {
@@ -174,18 +175,17 @@
 
 .job-card-status-buttons {
     display: flex;
-    gap: 6px;
+    gap: 8px;
     flex-wrap: wrap;
 }
 
 .status-btn {
-    flex: 1;
-    min-width: 0;
-    padding: 8px 6px;
+    flex: 1 1 auto;
+    padding: 8px 10px;
     border-radius: 10px;
     border: 1.5px solid var(--border-color);
     background: transparent;
-    font-size: 0.68rem;
+    font-size: 0.75rem;
     font-weight: 700;
     font-family: inherit;
     cursor: pointer;
@@ -196,7 +196,7 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 5px;
+    gap: 6px;
 }
 
 .status-btn-dot {
