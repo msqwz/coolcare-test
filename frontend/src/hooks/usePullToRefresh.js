@@ -9,7 +9,7 @@ export function usePullToRefresh(onRefresh) {
   const threshold = 80
 
   const handleTouchStart = useCallback((e) => {
-    if (containerRef.current && containerRef.current.scrollTop <= 0) {
+    if (window.scrollY <= 0) {
       startY.current = e.touches[0].clientY
       setPulling(true)
     }
