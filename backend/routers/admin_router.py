@@ -11,50 +11,32 @@ router = APIRouter(prefix="/admin", tags=["admin"])
 
 
 @router.get("/jobs", response_model=List[schemas.JobResponse])
-def get_all_jobs_admin(current_user: dict = Depends(check_admin)):
+def get_all_jobs_admin(limit: int = 50, offset: int = 0, current_user: dict = Depends(check_admin)):
     """Получение ВСЕХ заявок всех мастеров для диспетчера."""
-    result = supabase.table("jobs").select("*").order("scheduled_at", desc=True).execute()
+    result = supabase.table("jobs").select("*").order("scheduled_at", desc=True).range(offset, offset + limit - 1).execute()
     return result.data or []
 
 
 @router.get("/stats", response_model=dict)
 def get_admin_stats(current_user: dict = Depends(check_admin)):
-    """Общая статистика по всей системе для диспетчера."""
-    jobs_res = supabase.table("jobs").select("status, price, job_type, completed_at, created_at, services").execute()
-    users_res = supabase.table("users").select("id, is_active").execute()
-
-    all_jobs = jobs_res.data or []
-    all_users = users_res.data or []
-
-    total_revenue = sum(calculate_job_total(j) for j in all_jobs if j.get("status") == "completed")
-
-    now = datetime.now(timezone.utc)
-    month_start = datetime(now.year, now.month, 1, tzinfo=timezone.utc)
-    monthly_revenue = 0
-    for j in all_jobs:
-        if j.get("status") == "completed" and j.get("completed_at"):
-            try:
-                comp_dt = datetime.fromisoformat(j["completed_at"].replace("Z", "+00:00"))
-                if comp_dt >= month_start:
-                    monthly_revenue += calculate_job_total(j)
-            except:
-                pass
-
-    type_dist = {}
-    for j in all_jobs:
-        jt = j.get("job_type") or "other"
-        type_dist[jt] = type_dist.get(jt, 0) + 1
-
-    return {
-        "total_jobs": len(all_jobs),
-        "total_users": len(all_users),
-        "active_users": len([u for u in all_users if u.get("is_active")]),
-        "total_revenue": total_revenue,
-        "monthly_revenue": monthly_revenue,
-        "active_jobs": len([j for j in all_jobs if j.get("status") == "active"]),
-        "completed_jobs": len([j for j in all_jobs if j.get("status") == "completed"]),
-        "type_distribution": type_dist
-    }
+    """Общая статистика по всей системе для диспетчера через RPC вызов."""
+    try:
+        # Call the PostgreSQL function (RPC) we created in Supabase
+        result = supabase.rpc("get_admin_stats").execute()
+        return result.data
+    except Exception as e:
+        print(f"❌ Error getting admin stats via RPC: {e}")
+        # Fallback to empty stats if RPC fails or isn't created yet
+        return {
+            "total_jobs": 0,
+            "total_users": 0,
+            "active_users": 0,
+            "total_revenue": 0,
+            "monthly_revenue": 0,
+            "active_jobs": 0,
+            "completed_jobs": 0,
+            "type_distribution": {}
+        }
 
 
 # --- Пользователи ---
@@ -112,17 +94,13 @@ def update_job_admin(job_id: int, job_update: schemas.JobUpdate, current_user: d
         res = supabase.table("jobs").select("*").eq("id", job_id).execute()
         return res.data[0] if res.data else None
 
+    # Ensure datetimes are ISO formatted strings for JSON serialization
+    for field in ["scheduled_at", "completed_at"]:
+        if isinstance(update_data.get(field), datetime):
+            update_data[field] = update_data[field].isoformat()
+
     update_data["updated_at"] = datetime.now(timezone.utc).isoformat()
     update_data = auto_calc_services_price(update_data)
-
-    for field in ["scheduled_at", "completed_at"]:
-        if field in update_data and update_data[field]:
-            if isinstance(update_data[field], str):
-                try:
-                    dt = datetime.fromisoformat(update_data[field].replace("Z", "+00:00"))
-                    update_data[field] = dt.isoformat()
-                except:
-                    pass
 
     result = supabase.table("jobs").update(update_data).eq("id", job_id).execute()
     if not result.data:
@@ -135,16 +113,10 @@ def create_job_admin(job: schemas.JobCreate, current_user: dict = Depends(check_
     """Админское создание заявки для любого мастера."""
     job_data = job.model_dump(exclude_unset=True)
 
+    # Ensure datetimes are ISO formatted strings for JSON serialization
     for field in ["scheduled_at", "completed_at"]:
-        if field in job_data and job_data[field]:
-            if isinstance(job_data[field], datetime):
-                job_data[field] = job_data[field].isoformat()
-            elif isinstance(job_data[field], str):
-                try:
-                    dt = datetime.fromisoformat(job_data[field].replace("Z", "+00:00"))
-                    job_data[field] = dt.isoformat()
-                except:
-                    pass
+        if isinstance(job_data.get(field), datetime):
+            job_data[field] = job_data[field].isoformat()
 
     job_data["updated_at"] = datetime.now(timezone.utc).isoformat()
     job_data = auto_calc_services_price(job_data)

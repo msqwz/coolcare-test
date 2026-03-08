@@ -29,11 +29,17 @@ echo "========================================="
 stop_app() {
     echo "⏹️  Остановка старого процесса..."
     
-    # Остановка по PID-файлу
+    # 1. Сначала пробуем остановить через systemctl
+    if systemctl list-unit-files | grep -q coolcare.service; then
+        echo "   📍 Остановка системной службы coolcare..."
+        sudo systemctl stop coolcare || true
+    fi
+    
+    # 2. Остановка по PID-файлу (на случай если остались старые процессы от nohup)
     if [ -f "$PID_FILE" ]; then
         OLD_PID=$(cat "$PID_FILE")
         if kill -0 "$OLD_PID" 2>/dev/null; then
-            echo "   📍 Остановка процесса $OLD_PID..."
+            echo "   📍 Остановка процесса $OLD_PID (legacy)..."
             kill "$OLD_PID" 2>/dev/null || true
             sleep 2
             kill -9 "$OLD_PID" 2>/dev/null || true
@@ -42,11 +48,11 @@ stop_app() {
         rm -f "$PID_FILE"
     fi
     
-    # Дублирующая проверка по имени процесса
+    # 3. Дублирующая проверка по имени процесса
     pkill -f "python.*$APP_ENTRY" 2>/dev/null || true
     pkill -f "uvicorn.*$APP_DIR" 2>/dev/null || true
     sleep 1
-    echo "✅ Все процессы остановлены"
+    echo "✅ Все ассоциированные процессы остановлены"
 }
 
 # === 1. Остановить приложение ===
@@ -225,22 +231,29 @@ if [ "$STASHED" -eq 1 ]; then
     fi
 fi
 
-# === 9. Запуск приложения ===
-echo "🚀 Запуск приложения..."
-cd "$APP_DIR"
+# === 9. Запуск приложения через Systemd ===
+echo "🚀 Запуск приложения (Systemd)..."
+cd /var/www/coolcare
 
-# Запускаем в фоне с логированием
-nohup "$PYTHON" "$APP_ENTRY" > "$LOG_FILE" 2>&1 &
-APP_PID=$!
-echo $APP_PID > "$PID_FILE"
-
-# Ждём запуска и проверяем
-sleep 3
-if kill -0 "$APP_PID" 2>/dev/null; then
-    echo "✅ Приложение запущено (PID: $APP_PID)"
+# Копируем и активируем systemd сервис
+if [ -f "backend/coolcare.service" ]; then
+    echo "⚙️  Настройка systemd службы..."
+    sudo cp backend/coolcare.service /etc/systemd/system/coolcare.service
+    sudo systemctl daemon-reload
+    sudo systemctl enable coolcare
+    sudo systemctl restart coolcare
+    
+    # Ждём запуска и проверяем статус
+    sleep 3
+    if systemctl is-active --quiet coolcare; then
+        echo "✅ Служба coolcare успешно запущена"
+    else
+        echo "❌ Служба coolcare не смогла запуститься! Проверьте логи:"
+        sudo journalctl -u coolcare -n 50 --no-pager
+        exit 1
+    fi
 else
-    echo "❌ Процесс не запустился! Проверьте логи:"
-    tail -n 50 "$LOG_FILE"
+    echo "❌ Файл backend/coolcare.service не найден. Невозможно запустить приложение."
     exit 1
 fi
 

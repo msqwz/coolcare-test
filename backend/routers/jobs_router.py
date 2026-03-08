@@ -79,6 +79,8 @@ def get_route_optimize(
 @router.get("", response_model=List[schemas.JobResponse])
 def get_jobs(
     status_filter: Optional[str] = None,
+    limit: int = 50,
+    offset: int = 0,
     current_user: dict = Depends(auth.get_current_user)
 ):
     query = supabase.table("jobs").select("*").eq("user_id", current_user["id"])
@@ -86,7 +88,7 @@ def get_jobs(
     if status_filter:
         query = query.eq("status", status_filter)
 
-    result = query.order("scheduled_at", desc=True).execute()
+    result = query.order("scheduled_at", desc=True).range(offset, offset + limit - 1).execute()
     return result.data or []
 
 
@@ -103,28 +105,19 @@ def get_job(job_id: int, current_user: dict = Depends(auth.get_current_user)):
     return result.data[0]
 
 
-def _process_dates(data: dict) -> dict:
-    """Преобразует datetime в ISO-строки для Supabase."""
-    for field in ["scheduled_at", "completed_at"]:
-        if field in data and data[field]:
-            if isinstance(data[field], datetime):
-                data[field] = data[field].isoformat()
-            elif isinstance(data[field], str):
-                try:
-                    dt = datetime.fromisoformat(data[field].replace("Z", "+00:00"))
-                    data[field] = dt.isoformat()
-                except (ValueError, TypeError):
-                    del data[field]
-    return data
-
-
 @router.post("", response_model=schemas.JobResponse)
 def create_job(
     job: schemas.JobCreate,
     current_user: dict = Depends(auth.get_current_user)
 ):
+    # Pydantic parses dates correctly. When dumping, we convert them to ISO strings for Supabase.
     job_data = job.model_dump(exclude_unset=True)
-    job_data = _process_dates(job_data)
+    
+    # Ensure datetimes are ISO formatted strings for JSON serialization
+    for field in ["scheduled_at", "completed_at"]:
+        if isinstance(job_data.get(field), datetime):
+            job_data[field] = job_data[field].isoformat()
+            
     job_data["user_id"] = current_user["id"]
     job_data["updated_at"] = datetime.now(timezone.utc).isoformat()
 
@@ -154,11 +147,15 @@ def update_job(
         raise HTTPException(status_code=404, detail="Job not found")
 
     update_data = job_update.model_dump(exclude_unset=True)
-    update_data = _process_dates(update_data)
 
     if not update_data:
         result = supabase.table("jobs").select("*").eq("id", job_id).execute()
         return result.data[0] if result.data else None
+
+    # Ensure datetimes are ISO formatted strings for JSON serialization
+    for field in ["scheduled_at", "completed_at"]:
+        if isinstance(update_data.get(field), datetime):
+            update_data[field] = update_data[field].isoformat()
 
     update_data["updated_at"] = datetime.now(timezone.utc).isoformat()
 
