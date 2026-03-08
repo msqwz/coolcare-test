@@ -14,14 +14,18 @@ router = APIRouter(prefix="/jobs", tags=["jobs"])
 @router.get("/today", response_model=List[schemas.JobResponse])
 def get_today_jobs(current_user: dict = Depends(auth.get_current_user)) -> List[dict]:
     today = date.today().isoformat()
+    start_of_day = f"{today}T00:00:00"
+    end_of_day = f"{today}T23:59:59"
 
     result = supabase.table("jobs") \
         .select("*") \
         .eq("user_id", current_user["id"]) \
+        .gte("scheduled_at", start_of_day) \
+        .lte("scheduled_at", end_of_day) \
+        .order("scheduled_at", desc=False) \
         .execute()
 
-    today_jobs = [j for j in (result.data or []) if j.get("scheduled_at") and j["scheduled_at"][:10] == today]
-    return sorted(today_jobs, key=lambda x: x.get("scheduled_at", ""))
+    return result.data or []
 
 
 @router.get("/route/optimize")

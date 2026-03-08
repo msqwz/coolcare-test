@@ -78,7 +78,8 @@ def format_job_message(job: dict) -> str:
             else:
                 dt = scheduled
             date_str = dt.strftime("%d.%m.%Y %H:%M")
-        except:
+        except Exception as e:
+            logger.warning(f"Error parsing date {scheduled}: {e}")
             date_str = str(scheduled)[:16]
 
     # Собираем список услуг

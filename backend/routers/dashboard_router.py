@@ -13,7 +13,7 @@ router = APIRouter(prefix="/dashboard", tags=["dashboard"])
 @router.get("/stats", response_model=schemas.DashboardStats)
 def get_dashboard_stats(current_user: dict = Depends(auth.get_current_user)) -> dict:
     result = supabase.table("jobs") \
-        .select("*") \
+        .select("id, status, price, services, scheduled_at") \
         .eq("user_id", current_user["id"]) \
         .execute()
 
