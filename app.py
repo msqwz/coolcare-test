@@ -15,6 +15,9 @@ sys.path.insert(0, BACKEND_DIR)
 
 print("Starting CoolCare PWA server...")
 import uvicorn
-from main import app
 
-uvicorn.run(app, host="0.0.0.0", port=8000, log_level="info")
+if __name__ == "__main__":
+    # Передаем приложение строкой "main:app" вместо объекта app,
+    # чтобы избежать конфликтов и ошибок инициализации asyncio loops (особенно в Python 3.12+)
+    # при создании клиента Supabase до запуска Uvicorn
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, log_level="info")
