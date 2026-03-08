@@ -26,8 +26,10 @@
 }
 
 .tab-header h2 {
-    font-size: 1.25rem;
-    font-weight: 500;
+    font-size: 1.8rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    color: var(--text-color);
     margin: 0;
 }
 
@@ -113,7 +115,7 @@
     }
     
     .tab-header h2 {
-        font-size: 1.5rem;
+        font-size: 2rem;
     }
     
     .tab-header .btn-add {
