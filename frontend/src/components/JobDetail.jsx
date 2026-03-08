@@ -385,7 +385,15 @@ export function JobDetail({ job, onClose, onUpdate, onDelete, onAddressClick, is
               onChange={(e) => setFormData({ ...formData, price: e.target.value })}
               placeholder="0"
               min="0"
+              disabled={formData.services && formData.services.length > 0}
+              title={formData.services && formData.services.length > 0 ? "Сумма рассчитывается автоматически из списка услуг" : ""}
+              style={formData.services && formData.services.length > 0 ? { backgroundColor: 'var(--bg-color)', cursor: 'not-allowed', color: 'var(--text-muted)' } : {}}
             />
+            {formData.services && formData.services.length > 0 && (
+              <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '4px' }}>
+                Цена рассчитывается автоматически из услуг
+              </div>
+            )}
           </div>
           <div className="form-actions">
             <button className="btn-primary" onClick={handleSave} disabled={loading}>

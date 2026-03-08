@@ -187,7 +187,15 @@ function JobModal({ job, workers, onClose, onSave }) {
                         </div>
                         <div className="input-group">
                             <label>Цена (₽)</label>
-                            <input type="number" placeholder="0" value={formData.price || ''} onChange={e => setFormData({ ...formData, price: e.target.value })} />
+                            <input 
+                                type="number" 
+                                placeholder="0" 
+                                value={formData.price || ''} 
+                                onChange={e => setFormData({ ...formData, price: e.target.value })} 
+                                disabled={formData.services && formData.services.length > 0}
+                                title={formData.services && formData.services.length > 0 ? "Сумма рассчитывается автоматически из списка услуг" : ""}
+                                style={formData.services && formData.services.length > 0 ? { backgroundColor: 'rgba(0,0,0,0.05)', cursor: 'not-allowed', color: 'var(--text-muted)' } : {}}
+                            />
                         </div>
                         <div className="input-group">
                             <label>Дата и время</label>
@@ -230,7 +238,7 @@ function JobModal({ job, workers, onClose, onSave }) {
 }
 
 export function Jobs() {
-    const { jobs, setJobs, workers, loadData } = useAdmin()
+    const { jobs, setJobs, workers, loadData, hasMoreJobs, loadMoreJobs } = useAdmin()
     const [statusFilter, setStatusFilter] = useState('all')
     const [searchTerm, setSearchTerm] = useState('')
     const [isModalOpen, setIsModalOpen] = useState(false)
@@ -399,6 +407,13 @@ export function Jobs() {
                     <div style={{ padding: '80px', textAlign: 'center', color: 'var(--text-muted)' }}>
                         <div style={{ fontSize: '1.2rem', fontWeight: '700', marginBottom: '8px' }}>Ничего не найдено</div>
                         <p style={{ margin: 0 }}>Попробуйте изменить параметры поиска или фильтры</p>
+                    </div>
+                )}
+                {hasMoreJobs && (
+                    <div style={{ padding: '20px', textAlign: 'center' }}>
+                        <button className="btn-secondary" onClick={loadMoreJobs} style={{ padding: '10px 24px' }}>
+                            Загрузить еще
+                        </button>
                     </div>
                 )}
             </div>

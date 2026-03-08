@@ -24,6 +24,13 @@ export function AppProvider({ children }) {
   const [stats, setStats] = useState(null)
   const [todayJobs, setTodayJobs] = useState([])
   const [syncing, setSyncing] = useState(false)
+  
+  const [jobsOffset, setJobsOffset] = useState(0)
+  const [hasMoreJobs, setHasMoreJobs] = useState(true)
+  const [todayJobsOffset, setTodayJobsOffset] = useState(0)
+  const [hasMoreTodayJobs, setHasMoreTodayJobs] = useState(true)
+  const JOBS_LIMIT = 50
+
   const isOnline = useOnlineStatus()
 
   const loadStats = useCallback(async () => {
@@ -39,7 +46,10 @@ export function AppProvider({ children }) {
 
   const loadTodayJobs = useCallback(async () => {
     try {
-      setTodayJobs(await api.getTodayJobs())
+      const d = await api.getTodayJobs(0, JOBS_LIMIT)
+      setTodayJobs(d)
+      setTodayJobsOffset(JOBS_LIMIT)
+      setHasMoreTodayJobs(d.length === JOBS_LIMIT)
     } catch (e) {
       console.error(e)
     }
@@ -47,14 +57,50 @@ export function AppProvider({ children }) {
 
   const loadJobs = useCallback(async () => {
     try {
-      const d = await api.getJobs()
+      const d = await api.getJobs(null, 0, JOBS_LIMIT)
       setJobs(d)
       cacheJobs(d)
+      setJobsOffset(JOBS_LIMIT)
+      setHasMoreJobs(d.length === JOBS_LIMIT)
     } catch (e) {
       const c = await getCachedJobs()
       if (c.length > 0) setJobs(c)
     }
   }, [])
+
+  const loadMoreJobs = useCallback(async () => {
+    if (!hasMoreJobs || !isOnline) return
+    try {
+      const moreJobs = await api.getJobs(null, jobsOffset, JOBS_LIMIT)
+      setJobs(prev => {
+        const existingIds = new Set(prev.map(j => j.id))
+        const uniqueNewJobs = moreJobs.filter(j => !existingIds.has(j.id))
+        const updated = [...prev, ...uniqueNewJobs]
+        cacheJobs(updated)
+        return updated
+      })
+      setJobsOffset(prev => prev + JOBS_LIMIT)
+      setHasMoreJobs(moreJobs.length === JOBS_LIMIT)
+    } catch (e) {
+      console.error('Failed to load more jobs:', e)
+    }
+  }, [jobsOffset, hasMoreJobs, isOnline])
+
+  const loadMoreTodayJobs = useCallback(async () => {
+    if (!hasMoreTodayJobs || !isOnline) return
+    try {
+      const moreJobs = await api.getTodayJobs(todayJobsOffset, JOBS_LIMIT)
+      setTodayJobs(prev => {
+        const existingIds = new Set(prev.map(j => j.id))
+        const uniqueNewJobs = moreJobs.filter(j => !existingIds.has(j.id))
+        return [...prev, ...uniqueNewJobs]
+      })
+      setTodayJobsOffset(prev => prev + JOBS_LIMIT)
+      setHasMoreTodayJobs(moreJobs.length === JOBS_LIMIT)
+    } catch (e) {
+      console.error('Failed to load more today jobs:', e)
+    }
+  }, [todayJobsOffset, hasMoreTodayJobs, isOnline])
 
   const loadFromCache = useCallback(async () => {
     try {
@@ -256,6 +302,10 @@ export function AppProvider({ children }) {
     loadJobs,
     loadStats,
     loadTodayJobs,
+    hasMoreJobs,
+    hasMoreTodayJobs,
+    loadMoreJobs,
+    loadMoreTodayJobs,
     handleRefresh,
     handleLogin,
     handleLogout,

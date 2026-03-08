@@ -8,8 +8,8 @@ export const api = {
     ...commonApi,
 
     // Admin Specific
-    async getAllJobs() {
-        return this.request('/admin/jobs')
+    async getAllJobs(offset = 0, limit = 50) {
+        return this.request(`/admin/jobs?offset=${offset}&limit=${limit}`)
     },
     async getAdminStats() {
         return this.request('/admin/stats')

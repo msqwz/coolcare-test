@@ -32,6 +32,10 @@ function AppLayout() {
     handleJobCreated,
     handleStatusChange,
     handleResetStats,
+    hasMoreJobs,
+    hasMoreTodayJobs,
+    loadMoreJobs,
+    loadMoreTodayJobs,
   } = useApp()
   const navigate = useNavigate()
   const location = useLocation()
@@ -121,6 +125,8 @@ function AppLayout() {
               <HomeTab
                 stats={stats}
                 todayJobs={todayJobs}
+                hasMoreTodayJobs={hasMoreTodayJobs}
+                loadMoreTodayJobs={loadMoreTodayJobs}
                 onSelectJob={(job) => navigate(`/jobs/${job.id}`)}
                 onAddressClick={handleAddressNavigate}
                 onStatusChange={handleStatusChange}
@@ -135,6 +141,8 @@ function AppLayout() {
                 onShowForm={() => navigate('/jobs/new')}
                 onStatusChange={handleStatusChange}
                 jobs={jobs}
+                hasMoreJobs={hasMoreJobs}
+                loadMoreJobs={loadMoreJobs}
                 onRefresh={handleRefresh}
               />
             )}

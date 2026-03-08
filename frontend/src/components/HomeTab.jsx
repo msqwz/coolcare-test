@@ -3,7 +3,7 @@ import { PullToRefreshWrapper } from './PullToRefreshWrapper'
 import { JobCard } from './JobCard'
 import { ClipboardList, CalendarDays, Wrench, CheckCircle2, TrendingUp, DollarSign, XCircle } from 'lucide-react'
 
-export function HomeTab({ stats, todayJobs, onSelectJob, onAddressClick, onStatusChange, isOnline, onRefresh }) {
+export function HomeTab({ stats, todayJobs, hasMoreTodayJobs, loadMoreTodayJobs, onSelectJob, onAddressClick, onStatusChange, isOnline, onRefresh }) {
   const today = new Date().toLocaleDateString('ru-RU', {
     weekday: 'long',
     day: 'numeric',
@@ -94,6 +94,18 @@ export function HomeTab({ stats, todayJobs, onSelectJob, onAddressClick, onStatu
               ))
             )}
           </div>
+          
+          {hasMoreTodayJobs && todayJobs.length > 0 && (
+            <div className="load-more-container" style={{ textAlign: 'center', marginTop: '16px' }}>
+              <button 
+                className="btn-secondary" 
+                onClick={loadMoreTodayJobs}
+                style={{ width: '100%', padding: '12px' }}
+              >
+                Загрузить еще
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </PullToRefreshWrapper>

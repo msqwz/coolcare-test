@@ -138,13 +138,15 @@ def update_job(
     current_user: dict = Depends(auth.get_current_user)
 ):
     existing = supabase.table("jobs") \
-        .select("id") \
+        .select("id, price, status") \
         .eq("id", job_id) \
         .eq("user_id", current_user["id"]) \
         .execute()
 
     if not existing.data:
         raise HTTPException(status_code=404, detail="Job not found")
+        
+    original_job = existing.data[0]
 
     update_data = job_update.model_dump(exclude_unset=True)
 
@@ -163,7 +165,24 @@ def update_job(
         result = supabase.table("jobs").update(update_data).eq("id", job_id).execute()
         if not result.data:
             raise HTTPException(status_code=500, detail="Failed to update job in database")
-        return result.data[0]
+            
+        updated_job = result.data[0]
+        
+        # Log changes to audit_logs
+        for field in ["price", "status"]:
+            if field in update_data and str(update_data[field]) != str(original_job.get(field)):
+                try:
+                    supabase.table("job_audit_logs").insert({
+                        "job_id": job_id,
+                        "user_id": current_user["id"],
+                        "field_name": field,
+                        "old_value": str(original_job.get(field, "")),
+                        "new_value": str(update_data[field])
+                    }).execute()
+                except Exception as log_err:
+                    print(f"⚠️ Failed to write audit log for {field}: {log_err}")
+            
+        return updated_job
     except Exception as e:
         print(f"❌ Error updating job: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")

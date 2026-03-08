@@ -10,17 +10,22 @@ export function AdminProvider({ children }) {
     const [stats, setStats] = useState(null)
     const [jobs, setJobs] = useState([])
     const [workers, setWorkers] = useState([])
+    const [jobsOffset, setJobsOffset] = useState(0)
+    const [hasMoreJobs, setHasMoreJobs] = useState(true)
+    const JOBS_LIMIT = 50
 
     const loadData = useCallback(async () => {
         try {
             const [s, j, w] = await Promise.all([
                 api.getAdminStats(),
-                api.getAllJobs(),
+                api.getAllJobs(0, JOBS_LIMIT),
                 api.getWorkers()
             ])
             setStats(s)
             setJobs(j)
             setWorkers(w)
+            setJobsOffset(JOBS_LIMIT)
+            setHasMoreJobs(j.length === JOBS_LIMIT)
         } catch (e) {
             console.error('Failed to load admin data:', e)
         }
@@ -94,13 +99,31 @@ export function AdminProvider({ children }) {
         }
     }, [handleLogin])
 
+    const loadMoreJobs = useCallback(async () => {
+        if (!hasMoreJobs || loading) return
+        try {
+            const moreJobs = await api.getAllJobs(jobsOffset, JOBS_LIMIT)
+            setJobs(prev => {
+                const existingIds = new Set(prev.map(j => j.id))
+                const uniqueNewJobs = moreJobs.filter(j => !existingIds.has(j.id))
+                return [...prev, ...uniqueNewJobs]
+            })
+            setJobsOffset(prev => prev + JOBS_LIMIT)
+            setHasMoreJobs(moreJobs.length === JOBS_LIMIT)
+        } catch (e) {
+            console.error('Failed to load more jobs:', e)
+        }
+    }, [jobsOffset, hasMoreJobs, loading])
+
     const value = {
         user,
         loading,
         stats,
         jobs,
         workers,
+        hasMoreJobs,
         loadData,
+        loadMoreJobs,
         handleLogin,
         setUser,
         setJobs,

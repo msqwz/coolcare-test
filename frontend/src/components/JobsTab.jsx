@@ -4,7 +4,7 @@ import { JobCard } from './JobCard'
 import { filterJobs } from '../lib/filterJobs'
 import { JOB_TYPE_LIST } from '../constants'
 
-export function JobsTab({ onSelectJob, onAddressClick, onShowForm, onStatusChange, jobs, onRefresh }) {
+export function JobsTab({ onSelectJob, onAddressClick, onShowForm, onStatusChange, jobs, hasMoreJobs, loadMoreJobs, onRefresh }) {
   const [filter, setFilter] = useState('')
   const [search, setSearch] = useState('')
   const [jobTypeFilter, setJobTypeFilter] = useState('')
@@ -88,6 +88,18 @@ export function JobsTab({ onSelectJob, onAddressClick, onShowForm, onStatusChang
             ))
           )}
         </div>
+        
+        {hasMoreJobs && jobs.length > 0 && (
+          <div className="load-more-container" style={{ textAlign: 'center', margin: '16px 0' }}>
+            <button 
+              className="btn-secondary" 
+              onClick={loadMoreJobs}
+              style={{ width: '100%', padding: '12px' }}
+            >
+              Загрузить еще
+            </button>
+          </div>
+        )}
       </div>
     </PullToRefreshWrapper>
   )

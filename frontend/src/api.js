@@ -6,7 +6,7 @@ const API_URL =
       : window.location.origin
 
 export const api = {
-  async request(endpoint, options = {}) {
+  async request(endpoint, options = {}, isRetry = false) {
     const token = localStorage.getItem('access_token')
     const headers = {
       'Content-Type': 'application/json',
@@ -14,12 +14,34 @@ export const api = {
       ...options.headers,
     }
     const response = await fetch(`${API_URL}${endpoint}`, { ...options, headers })
+    
     if (response.status === 401) {
+      if (!isRetry) {
+        const refreshToken = localStorage.getItem('refresh_token')
+        if (refreshToken) {
+          try {
+            const refreshRes = await fetch(`${API_URL}/auth/refresh`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ refresh_token: refreshToken })
+            })
+            if (refreshRes.ok) {
+              const data = await refreshRes.json()
+              localStorage.setItem('access_token', data.access_token)
+              return this.request(endpoint, options, true)
+            }
+          } catch (e) {
+            console.error('Token refresh failed', e)
+          }
+        }
+      }
+      
       localStorage.removeItem('access_token')
       localStorage.removeItem('refresh_token')
       window.location.reload()
       throw new Error('Unauthorized')
     }
+    
     if (!response.ok) {
       const error = await response.json().catch(() => ({ detail: 'Request failed' }))
       throw new Error(error.detail || 'Request failed')
@@ -44,11 +66,15 @@ export const api = {
   async resetDashboardStats() {
     return this.request('/dashboard/reset-stats', { method: 'POST' })
   },
-  async getTodayJobs() {
-    return this.request('/jobs/today')
+  async getTodayJobs(offset = 0, limit = 50) {
+    return this.request(`/jobs/today?offset=${offset}&limit=${limit}`)
   },
-  async getJobs(status) {
-    return this.request(`/jobs${status ? '?status=' + status : ''}`)
+  async getJobs(status, offset = 0, limit = 50) {
+    const url = new URL('/jobs', API_URL)
+    if (status) url.searchParams.append('status', status)
+    url.searchParams.append('offset', offset)
+    url.searchParams.append('limit', limit)
+    return this.request(url.pathname + url.search)
   },
   async getJob(id) {
     return this.request(`/jobs/${id}`)

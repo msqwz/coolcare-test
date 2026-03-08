@@ -89,6 +89,12 @@ def delete_user_admin(user_id: int, current_user: dict = Depends(check_admin)):
 @router.put("/jobs/{job_id}", response_model=schemas.JobResponse)
 def update_job_admin(job_id: int, job_update: schemas.JobUpdate, current_user: dict = Depends(check_admin)):
     """Админское обновление ЛЮБОЙ заявки."""
+    existing = supabase.table("jobs").select("id, price, status").eq("id", job_id).execute()
+    if not existing.data:
+        raise HTTPException(status_code=404, detail="Job not found")
+        
+    original_job = existing.data[0]
+    
     update_data = job_update.model_dump(exclude_unset=True)
     if not update_data:
         res = supabase.table("jobs").select("*").eq("id", job_id).execute()
@@ -105,7 +111,24 @@ def update_job_admin(job_id: int, job_update: schemas.JobUpdate, current_user: d
     result = supabase.table("jobs").update(update_data).eq("id", job_id).execute()
     if not result.data:
         raise HTTPException(status_code=404, detail="Job not found")
-    return result.data[0]
+        
+    updated_job = result.data[0]
+    
+    # Log changes to audit_logs
+    for field in ["price", "status"]:
+        if field in update_data and str(update_data[field]) != str(original_job.get(field)):
+            try:
+                supabase.table("job_audit_logs").insert({
+                    "job_id": job_id,
+                    "user_id": current_user["id"],
+                    "field_name": field,
+                    "old_value": str(original_job.get(field, "")),
+                    "new_value": str(update_data[field])
+                }).execute()
+            except Exception as log_err:
+                print(f"⚠️ Failed to write audit log for {field}: {log_err}")
+                
+    return updated_job
 
 
 @router.post("/jobs", response_model=schemas.JobResponse)

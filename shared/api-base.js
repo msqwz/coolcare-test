@@ -8,7 +8,7 @@ const getApiUrl = () => {
 
 export const API_URL = getApiUrl()
 
-export const request = async (endpoint, options = {}) => {
+export const request = async (endpoint, options = {}, isRetry = false) => {
     const token = localStorage.getItem('access_token')
     const headers = {
         'Content-Type': 'application/json',
@@ -18,6 +18,26 @@ export const request = async (endpoint, options = {}) => {
     const response = await fetch(`${API_URL}${endpoint}`, { ...options, headers })
 
     if (response.status === 401) {
+        if (!isRetry) {
+            const refreshToken = localStorage.getItem('refresh_token')
+            if (refreshToken) {
+                try {
+                    const refreshRes = await fetch(`${API_URL}/auth/refresh`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ refresh_token: refreshToken })
+                    })
+                    if (refreshRes.ok) {
+                        const data = await refreshRes.json()
+                        localStorage.setItem('access_token', data.access_token)
+                        return request(endpoint, options, true)
+                    }
+                } catch (e) {
+                    console.error('Token refresh failed', e)
+                }
+            }
+        }
+
         localStorage.removeItem('access_token')
         localStorage.removeItem('refresh_token')
         // Dispatcher uses /admin/login, PWA uses / (login screen)
