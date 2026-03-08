@@ -7,8 +7,8 @@ import auth
 router = APIRouter(prefix="/push", tags=["push"])
 
 
-@router.get("/vapid-public")
-def get_vapid_public():
+@router.get("/vapid-public", response_model=dict)
+def get_vapid_public() -> dict:
     """Возвращает публичный VAPID ключ для Web Push подписки."""
     try:
         from push_service import VAPID_PUBLIC
@@ -19,11 +19,11 @@ def get_vapid_public():
         raise HTTPException(status_code=503, detail="Push service not available")
 
 
-@router.post("/subscribe")
+@router.post("/subscribe", response_model=dict)
 def push_subscribe(
     request: schemas.PushSubscribeRequest,
     current_user: dict = Depends(auth.get_current_user)
-):
+) -> dict:
     """Сохраняет Web Push подписку пользователя."""
     sub_data = {
         "user_id": current_user["id"],

@@ -11,7 +11,7 @@ router = APIRouter(prefix="/dashboard", tags=["dashboard"])
 
 
 @router.get("/stats", response_model=schemas.DashboardStats)
-def get_dashboard_stats(current_user: dict = Depends(auth.get_current_user)):
+def get_dashboard_stats(current_user: dict = Depends(auth.get_current_user)) -> dict:
     result = supabase.table("jobs") \
         .select("*") \
         .eq("user_id", current_user["id"]) \
@@ -41,7 +41,7 @@ def get_dashboard_stats(current_user: dict = Depends(auth.get_current_user)):
 
 
 @router.post("/reset-stats", response_model=schemas.DashboardStats)
-def reset_dashboard_stats(current_user: dict = Depends(auth.get_current_user)):
+def reset_dashboard_stats(current_user: dict = Depends(auth.get_current_user)) -> dict:
     """Сброс статистики: удаляет завершённые и отменённые заявки пользователя."""
     rows = supabase.table("jobs") \
         .select("id,status") \

@@ -1,16 +1,18 @@
 """Роутер заявок мастера: /jobs/*"""
 from fastapi import APIRouter, Depends, HTTPException
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
+import logging
 from datetime import datetime, date, timezone
 from database import supabase, supabase_admin
 import schemas
 import auth
 
+logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/jobs", tags=["jobs"])
 
 
 @router.get("/today", response_model=List[schemas.JobResponse])
-def get_today_jobs(current_user: dict = Depends(auth.get_current_user)):
+def get_today_jobs(current_user: dict = Depends(auth.get_current_user)) -> List[dict]:
     today = date.today().isoformat()
 
     result = supabase.table("jobs") \
@@ -26,7 +28,7 @@ def get_today_jobs(current_user: dict = Depends(auth.get_current_user)):
 def get_route_optimize(
     date_str: str,
     current_user: dict = Depends(auth.get_current_user)
-):
+) -> Dict[str, Any]:
     """Оптимизация порядка визитов (nearest-neighbour) для заявок на указанную дату."""
     try:
         target_date = datetime.strptime(date_str, "%Y-%m-%d").date()
@@ -50,7 +52,7 @@ def get_route_optimize(
         return {"order": [j["id"] for j in jobs_with_coords], "jobs": jobs_with_coords, "total_distance_km": 0}
 
     import math
-    def dist(a, b):
+    def dist(a: dict, b: dict) -> float:
         lat1, lon1 = a["latitude"], a["longitude"]
         lat2, lon2 = b["latitude"], b["longitude"]
         R = 6371
@@ -82,7 +84,7 @@ def get_jobs(
     limit: int = 50,
     offset: int = 0,
     current_user: dict = Depends(auth.get_current_user)
-):
+) -> List[dict]:
     query = supabase.table("jobs").select("*").eq("user_id", current_user["id"])
 
     if status_filter:
@@ -93,7 +95,7 @@ def get_jobs(
 
 
 @router.get("/{job_id}", response_model=schemas.JobResponse)
-def get_job(job_id: int, current_user: dict = Depends(auth.get_current_user)):
+def get_job(job_id: int, current_user: dict = Depends(auth.get_current_user)) -> dict:
     result = supabase.table("jobs") \
         .select("*") \
         .eq("id", job_id) \
@@ -109,7 +111,7 @@ def get_job(job_id: int, current_user: dict = Depends(auth.get_current_user)):
 def create_job(
     job: schemas.JobCreate,
     current_user: dict = Depends(auth.get_current_user)
-):
+) -> dict:
     # Pydantic parses dates correctly. When dumping, we convert them to ISO strings for Supabase.
     job_data = job.model_dump(exclude_unset=True)
     
@@ -127,7 +129,7 @@ def create_job(
             raise HTTPException(status_code=500, detail="Failed to insert job to database")
         return result.data[0]
     except Exception as e:
-        print(f"❌ Error creating job: {str(e)}")
+        logger.error(f"Error creating job: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
 
 
@@ -136,7 +138,7 @@ def update_job(
     job_id: int,
     job_update: schemas.JobUpdate,
     current_user: dict = Depends(auth.get_current_user)
-):
+) -> dict:
     existing = supabase.table("jobs") \
         .select("id, price, status") \
         .eq("id", job_id) \
@@ -152,11 +154,11 @@ def update_job(
 
     if not update_data:
         result = supabase.table("jobs").select("*").eq("id", job_id).execute()
-        return result.data[0] if result.data else None
+        return result.data[0] if result.data else {} # changed from None to {} to be safer but better model would be ideal.
 
     # Ensure datetimes are ISO formatted strings for JSON serialization
     for field in ["scheduled_at", "completed_at"]:
-        if isinstance(update_data.get(field), datetime):
+        if isinstance(update_data.get(field), (datetime, date)):
             update_data[field] = update_data[field].isoformat()
 
     update_data["updated_at"] = datetime.now(timezone.utc).isoformat()
@@ -180,16 +182,16 @@ def update_job(
                         "new_value": str(update_data[field])
                     }).execute()
                 except Exception as log_err:
-                    print(f"⚠️ Failed to write audit log for {field}: {log_err}")
+                    logger.error(f"Failed to write audit log for {field}: {log_err}")
             
         return updated_job
     except Exception as e:
-        print(f"❌ Error updating job: {str(e)}")
+        logger.error(f"Error updating job: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
 
 
 @router.delete("/{job_id}")
-def delete_job(job_id: int, current_user: dict = Depends(auth.get_current_user)):
+def delete_job(job_id: int, current_user: dict = Depends(auth.get_current_user)) -> dict:
     existing = supabase.table("jobs") \
         .select("id") \
         .eq("id", job_id) \
@@ -201,3 +203,4 @@ def delete_job(job_id: int, current_user: dict = Depends(auth.get_current_user))
 
     supabase.table("jobs").delete().eq("id", job_id).execute()
     return {"message": "Job deleted"}
+

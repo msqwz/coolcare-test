@@ -8,7 +8,7 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 
 
 @router.post("/send-code", response_model=dict)
-def send_sms_code(request: schemas.PhoneLoginRequest):
+def send_sms_code(request: schemas.PhoneLoginRequest) -> dict:
     phone = request.phone.replace(" ", "").replace("-", "")
 
     result = supabase.table("users").select("*").eq("phone", phone).execute()
@@ -20,7 +20,7 @@ def send_sms_code(request: schemas.PhoneLoginRequest):
 
 
 @router.post("/verify-code", response_model=schemas.Token)
-def verify_sms_code(request: schemas.PhoneVerifyRequest):
+def verify_sms_code_endpoint(request: schemas.PhoneVerifyRequest) -> dict:
     phone = request.phone.replace(" ", "").replace("-", "")
 
     if not auth.verify_sms_code(phone, request.code):
@@ -40,7 +40,7 @@ def verify_sms_code(request: schemas.PhoneVerifyRequest):
 
 
 @router.post("/refresh", response_model=schemas.Token)
-def refresh_token_endpoint(request: schemas.RefreshRequest):
+def refresh_token_endpoint(request: schemas.RefreshRequest) -> dict:
     payload = auth.decode_token(request.refresh_token)
     if not payload or not payload.user_id:
         raise HTTPException(status_code=401, detail="Invalid refresh token")
@@ -61,7 +61,7 @@ def refresh_token_endpoint(request: schemas.RefreshRequest):
 
 
 @router.get("/me", response_model=schemas.UserResponse)
-def get_current_user_info(current_user: dict = Depends(auth.get_current_user)):
+def get_current_user_info(current_user: dict = Depends(auth.get_current_user)) -> dict:
     return current_user
 
 
@@ -69,7 +69,7 @@ def get_current_user_info(current_user: dict = Depends(auth.get_current_user)):
 def update_current_user(
     update_data: schemas.UserUpdate,
     current_user: dict = Depends(auth.get_current_user)
-):
+) -> dict:
     data = update_data.model_dump(exclude_unset=True)
 
     for field in ["role", "is_active"]:

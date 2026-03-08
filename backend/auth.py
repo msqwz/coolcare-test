@@ -1,5 +1,6 @@
 import os
 import random
+import logging
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 
@@ -11,6 +12,7 @@ from database import supabase
 from schemas import TokenData
 
 load_dotenv()
+logger = logging.getLogger(__name__)
 
 # === Настройки ===
 SECRET_KEY = os.getenv("JWT_SECRET")
@@ -47,7 +49,7 @@ def create_sms_code(phone: str) -> str:
     expires = (datetime.now(timezone.utc) + timedelta(minutes=10)).isoformat()
     phone_norm = normalize_phone(phone)
     
-    print(f"DEBUG: Creating code: phone={phone_norm}, code={code}")
+    logger.debug(f"Creating code: phone={phone_norm}, code={code}")
     
     # Удаляем ВСЕ старые коды для этого номера
     supabase.table("sms_codes").delete().eq("phone", phone_norm).execute()
@@ -59,7 +61,7 @@ def create_sms_code(phone: str) -> str:
         "expires_at": expires
     }).execute()
     
-    print(f"DEBUG: SMS code for {phone_norm}: {code}")
+    logger.info(f"SMS code for {phone_norm}: {code}")
     return code
 
 
@@ -68,7 +70,7 @@ def verify_sms_code(phone: str, code: str) -> bool:
     phone_norm = normalize_phone(phone)
     code_str = str(code).strip()
     
-    print(f"DEBUG: Verification check: phone={phone_norm}, code={code_str}")
+    logger.debug(f"Verification check: phone={phone_norm}, code={code_str}")
     
     try:
         # Ищем запись
@@ -78,7 +80,7 @@ def verify_sms_code(phone: str, code: str) -> bool:
             .eq("code", code_str) \
             .execute()
         
-        print(f"DEBUG: Query result: {result.data}")
+        logger.debug(f"Query result: {result.data}")
         
         if not result.data or len(result.data) == 0:
             # Попробуем найти любые коды для этого телефона (для отладки)
@@ -87,15 +89,14 @@ def verify_sms_code(phone: str, code: str) -> bool:
                 .eq("phone", phone_norm) \
                 .execute()
             if debug.data:
-                print(f"WARNING: Found other codes for {phone_norm}: {debug.data}")
+                logger.warning(f"Found other codes for {phone_norm}: {debug.data}")
             else:
-                print(f"ERROR: No records for {phone_norm} in DB")
+                logger.error(f"No records for {phone_norm} in DB")
             return False
         
         record = result.data[0]
         
         # Проверяем время
-        from datetime import datetime, timezone
         expires_str = record["expires_at"]
         if expires_str.endswith('Z'):
             expires_str = expires_str[:-1] + '+00:00'
@@ -104,20 +105,18 @@ def verify_sms_code(phone: str, code: str) -> bool:
         now = datetime.now(timezone.utc)
         
         if now > expires_at:
-            print(f"DEBUG: Code expired: {expires_at} < {now}")
+            logger.debug(f"Code expired: {expires_at} < {now}")
             supabase.table("sms_codes").delete().eq("id", record["id"]).execute()
             return False
         
         # Удаляем использованный код (простая стратегия)
         supabase.table("sms_codes").delete().eq("id", record["id"]).execute()
         
-        print(f"DEBUG: Code verified!")
+        logger.info(f"Code verified for {phone_norm}")
         return True
         
     except Exception as e:
-        print(f"ERROR: Verification error: {type(e).__name__}: {e}")
-        import traceback
-        traceback.print_exc()
+        logger.error(f"Verification error: {type(e).__name__}: {e}", exc_info=True)
         return False
 
 

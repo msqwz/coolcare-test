@@ -44,9 +44,9 @@ async def lifespan(app: FastAPI):
         from push_service import start_reminder_loop
         start_reminder_loop()
     except ImportError:
-        print("⚠️  push_service not found, skipping reminder loop")
+        logger.warning("push_service not found, skipping reminder loop")
     except Exception as e:
-        print(f"⚠️  Error starting reminder loop: {e}")
+        logger.error(f"Error starting reminder loop: {e}", exc_info=True)
         
     try:
         from telegram_bot import setup_webhook
@@ -54,7 +54,7 @@ async def lifespan(app: FastAPI):
         webhook_url = os.getenv("WEBHOOK_URL", "https://plus-cool.ru")
         setup_webhook(webhook_url)
     except Exception as e:
-        print(f"⚠️  Error setting up Telegram webhook: {e}")
+        logger.error(f"Error setting up Telegram webhook: {e}", exc_info=True)
         
     yield
 

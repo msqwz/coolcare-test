@@ -1,31 +1,33 @@
 """Роутер администратора: /admin/*"""
 from fastapi import APIRouter, Depends, HTTPException
-from typing import List
+from typing import List, Dict, Any
+import logging
 from datetime import datetime, timezone
 from database import supabase, supabase_admin
 import schemas
 import auth
 from utils import check_admin, calculate_job_total, auto_calc_services_price
 
+logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/admin", tags=["admin"])
 
 
 @router.get("/jobs", response_model=List[schemas.JobResponse])
-def get_all_jobs_admin(limit: int = 50, offset: int = 0, current_user: dict = Depends(check_admin)):
+def get_all_jobs_admin(limit: int = 50, offset: int = 0, current_user: dict = Depends(check_admin)) -> List[dict]:
     """Получение ВСЕХ заявок всех мастеров для диспетчера."""
     result = supabase.table("jobs").select("*").order("scheduled_at", desc=True).range(offset, offset + limit - 1).execute()
     return result.data or []
 
 
 @router.get("/stats", response_model=dict)
-def get_admin_stats(current_user: dict = Depends(check_admin)):
+def get_admin_stats(current_user: dict = Depends(check_admin)) -> Dict[str, Any]:
     """Общая статистика по всей системе для диспетчера через RPC вызов."""
     try:
         # Call the PostgreSQL function (RPC) we created in Supabase
         result = supabase.rpc("get_admin_stats").execute()
         return result.data
     except Exception as e:
-        print(f"❌ Error getting admin stats via RPC: {e}")
+        logger.error(f"Error getting admin stats via RPC: {e}", exc_info=True)
         # Fallback to empty stats if RPC fails or isn't created yet
         return {
             "total_jobs": 0,
@@ -42,13 +44,13 @@ def get_admin_stats(current_user: dict = Depends(check_admin)):
 # --- Пользователи ---
 
 @router.get("/users", response_model=List[schemas.UserResponse])
-def get_all_users_admin(current_user: dict = Depends(check_admin)):
+def get_all_users_admin(current_user: dict = Depends(check_admin)) -> List[dict]:
     result = supabase.table("users").select("*").order("created_at", desc=True).execute()
     return result.data or []
 
 
 @router.put("/users/{user_id}", response_model=schemas.UserResponse)
-def update_user_admin(user_id: int, update_data: schemas.UserUpdate, current_user: dict = Depends(check_admin)):
+def update_user_admin(user_id: int, update_data: schemas.UserUpdate, current_user: dict = Depends(check_admin)) -> dict:
     data = update_data.model_dump(exclude_unset=True)
     if not data:
         raise HTTPException(status_code=400, detail="No data provided")
@@ -60,7 +62,7 @@ def update_user_admin(user_id: int, update_data: schemas.UserUpdate, current_use
 
 
 @router.post("/users", response_model=schemas.UserResponse)
-def create_user_admin(user_data: schemas.UserCreate, current_user: dict = Depends(check_admin)):
+def create_user_admin(user_data: schemas.UserCreate, current_user: dict = Depends(check_admin)) -> dict:
     data = user_data.model_dump()
 
     existing = supabase.table("users").select("id").eq("phone", data["phone"]).execute()
@@ -74,7 +76,7 @@ def create_user_admin(user_data: schemas.UserCreate, current_user: dict = Depend
 
 
 @router.delete("/users/{user_id}")
-def delete_user_admin(user_id: int, current_user: dict = Depends(check_admin)):
+def delete_user_admin(user_id: int, current_user: dict = Depends(check_admin)) -> dict:
     if user_id == current_user["id"]:
         raise HTTPException(status_code=400, detail="Cannot delete yourself")
 
@@ -87,7 +89,7 @@ def delete_user_admin(user_id: int, current_user: dict = Depends(check_admin)):
 # --- Заявки ---
 
 @router.put("/jobs/{job_id}", response_model=schemas.JobResponse)
-def update_job_admin(job_id: int, job_update: schemas.JobUpdate, current_user: dict = Depends(check_admin)):
+def update_job_admin(job_id: int, job_update: schemas.JobUpdate, current_user: dict = Depends(check_admin)) -> dict:
     """Админское обновление ЛЮБОЙ заявки."""
     existing = supabase.table("jobs").select("id, price, status").eq("id", job_id).execute()
     if not existing.data:
@@ -126,13 +128,13 @@ def update_job_admin(job_id: int, job_update: schemas.JobUpdate, current_user: d
                     "new_value": str(update_data[field])
                 }).execute()
             except Exception as log_err:
-                print(f"⚠️ Failed to write audit log for {field}: {log_err}")
+                logger.error(f"Failed to write audit log for {field}: {log_err}")
                 
     return updated_job
 
 
 @router.post("/jobs", response_model=schemas.JobResponse)
-def create_job_admin(job: schemas.JobCreate, current_user: dict = Depends(check_admin)):
+def create_job_admin(job: schemas.JobCreate, current_user: dict = Depends(check_admin)) -> dict:
     """Админское создание заявки для любого мастера."""
     job_data = job.model_dump(exclude_unset=True)
 
@@ -159,13 +161,13 @@ def create_job_admin(job: schemas.JobCreate, current_user: dict = Depends(check_
         if worker.data:
             notify_worker_new_job(created_job, worker.data[0])
     except Exception as e:
-        print(f"⚠️ Telegram notification error: {e}")
+        logger.error(f"Telegram notification error: {e}", exc_info=True)
 
     return result.data[0]
 
 
 @router.delete("/jobs/{job_id}")
-def delete_job_admin(job_id: int, current_user: dict = Depends(check_admin)):
+def delete_job_admin(job_id: int, current_user: dict = Depends(check_admin)) -> dict:
     supabase.table("jobs").delete().eq("id", job_id).execute()
     return {"message": "Job deleted by admin"}
 
@@ -173,13 +175,13 @@ def delete_job_admin(job_id: int, current_user: dict = Depends(check_admin)):
 # --- Услуги ---
 
 @router.get("/services", response_model=List[schemas.ServiceResponse])
-def get_admin_services(current_user: dict = Depends(check_admin)):
+def get_admin_services(current_user: dict = Depends(check_admin)) -> List[dict]:
     result = supabase.table("predefined_services").select("*").order("name").execute()
     return result.data or []
 
 
 @router.post("/services", response_model=schemas.ServiceResponse)
-def create_admin_service(service: schemas.ServiceCreate, current_user: dict = Depends(check_admin)):
+def create_admin_service(service: schemas.ServiceCreate, current_user: dict = Depends(check_admin)) -> dict:
     data = service.model_dump()
     result = supabase.table("predefined_services").insert(data).execute()
     if not result.data:
@@ -188,7 +190,7 @@ def create_admin_service(service: schemas.ServiceCreate, current_user: dict = De
 
 
 @router.put("/services/{service_id}", response_model=schemas.ServiceResponse)
-def update_admin_service(service_id: int, service: schemas.ServiceCreate, current_user: dict = Depends(check_admin)):
+def update_admin_service(service_id: int, service: schemas.ServiceCreate, current_user: dict = Depends(check_admin)) -> dict:
     data = service.model_dump()
     result = supabase.table("predefined_services").update(data).eq("id", service_id).execute()
     if not result.data:
@@ -197,6 +199,7 @@ def update_admin_service(service_id: int, service: schemas.ServiceCreate, curren
 
 
 @router.delete("/services/{service_id}")
-def delete_admin_service(service_id: int, current_user: dict = Depends(check_admin)):
+def delete_admin_service(service_id: int, current_user: dict = Depends(check_admin)) -> dict:
     supabase.table("predefined_services").delete().eq("id", service_id).execute()
     return {"message": "Service deleted"}
+

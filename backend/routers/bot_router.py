@@ -9,8 +9,8 @@ router = APIRouter(prefix="/bot", tags=["bot"])
 logger = logging.getLogger(__name__)
 
 
-@router.post("/webhook")
-async def telegram_webhook(request: Request, background_tasks: BackgroundTasks):
+@router.post("/webhook", response_model=dict)
+async def telegram_webhook(request: Request, background_tasks: BackgroundTasks) -> dict:
     """Принимает обновления от Telegram (WebHook)."""
     try:
         update = await request.json()

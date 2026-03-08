@@ -1,21 +1,22 @@
-"""Web Push notifications service."""
 import os
 import json
 import threading
 import time
+import logging
 from datetime import datetime, timedelta, timezone
 
 from dotenv import load_dotenv
 from database import supabase
 
 load_dotenv()
+logger = logging.getLogger(__name__)
 
 VAPID_PRIVATE = os.getenv("VAPID_PRIVATE_KEY")
 VAPID_PUBLIC = os.getenv("VAPID_PUBLIC_KEY")
 REMINDER_MINUTES = int(os.getenv("PUSH_REMINDER_MINUTES", "30"))
 
 
-def send_push_to_subscription(subscription, title: str, body: str):
+def send_push_to_subscription(subscription: dict, title: str, body: str) -> bool:
     """Send a Web Push notification to a subscription."""
     if not VAPID_PRIVATE or not VAPID_PUBLIC:
         return False
@@ -37,11 +38,11 @@ def send_push_to_subscription(subscription, title: str, body: str):
         )
         return True
     except Exception as e:
-        print(f"Push send error: {e}")
+        logger.error(f"Push send error: {e}", exc_info=True)
         return False
 
 
-def check_and_send_reminders():
+def check_and_send_reminders() -> None:
     """Check for jobs starting soon and send push reminders."""
     if not VAPID_PRIVATE:
         return
@@ -77,12 +78,12 @@ def check_and_send_reminders():
                     if send_push_to_subscription(sub, title, body):
                         sent.add((user_id, job["id"]))
     except Exception as e:
-        print(f"Push reminder check error: {e}")
+        logger.error(f"Push reminder check error: {e}", exc_info=True)
 
 
-def start_reminder_loop():
+def start_reminder_loop() -> None:
     """Start background thread that checks for reminders every 5 minutes."""
-    def loop():
+    def loop() -> None:
         while True:
             time.sleep(300)
             check_and_send_reminders()
