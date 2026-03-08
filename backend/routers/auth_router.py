@@ -1,9 +1,12 @@
 """Роутер аутентификации: /auth/*"""
+import logging
 from fastapi import APIRouter, Depends, HTTPException
 from database import supabase
 import schemas
 import auth
+from telegram_bot import send_telegram_message
 
+logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 
@@ -12,11 +15,26 @@ def send_sms_code(request: schemas.PhoneLoginRequest) -> dict:
     phone = request.phone.replace(" ", "").replace("-", "")
 
     result = supabase.table("users").select("*").eq("phone", phone).execute()
+    user = None
     if not result.data:
-        supabase.table("users").insert({"phone": phone}).execute()
+        insert_res = supabase.table("users").insert({"phone": phone}).execute()
+        if insert_res.data:
+            user = insert_res.data[0]
+    else:
+        user = result.data[0]
 
     code = auth.create_sms_code(phone)
-    return {"message": "SMS code sent", "phone": phone, "debug_code": code}
+
+    # Отправка кода в Telegram (если указан chat_id)
+    if user and user.get("telegram_chat_id"):
+        try:
+            msg = f"🔐 Ваш код авторизации CoolCare: <b>{code}</b>\n\nНикому его не сообщайте."
+            send_telegram_message(user["telegram_chat_id"], msg)
+            logger.info(f"Auth code sent via Telegram to {phone}")
+        except Exception as e:
+            logger.error(f"Failed to send auth code via Telegram: {e}")
+
+    return {"message": "Code sent", "phone": phone, "debug_code": code}
 
 
 @router.post("/verify-code", response_model=schemas.Token)

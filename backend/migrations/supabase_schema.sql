@@ -105,7 +105,5 @@ ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE jobs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE sms_codes ENABLE ROW LEVEL SECURITY;
 
--- Политики: разрешаем всё для anon (JWT авторизация на уровне FastAPI)
-CREATE POLICY "Allow all for anon" ON users FOR ALL USING (true) WITH CHECK (true);
-CREATE POLICY "Allow all for anon" ON jobs FOR ALL USING (true) WITH CHECK (true);
-CREATE POLICY "Allow all for anon" ON sms_codes FOR ALL USING (true) WITH CHECK (true);
+-- Политики: публичный доступ ограничен (используется service role в backend)
+-- Бывшие политики Allow all удалены в рамках Аудита 6.0 для устранения уязвимости базы данных.

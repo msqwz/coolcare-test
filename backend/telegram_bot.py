@@ -42,10 +42,19 @@ def setup_webhook(app_url: str) -> bool:
         logger.warning("TELEGRAM_BOT_TOKEN no set, skipping webhook setup.")
         return False
 
+    webhook_secret = os.getenv("WEBHOOK_SECRET_TOKEN")
+    if not webhook_secret:
+        logger.warning("WEBHOOK_SECRET_TOKEN not set! Webhook will be vulnerable to spoofing.")
+
     try:
         url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/setWebhook"
         webhook_url = f"{app_url.rstrip('/')}/bot/webhook"
-        data = json.dumps({"url": webhook_url}).encode("utf-8")
+        
+        payload = {"url": webhook_url}
+        if webhook_secret:
+            payload["secret_token"] = webhook_secret
+            
+        data = json.dumps(payload).encode("utf-8")
         
         req = urllib.request.Request(url, data=data, headers={"Content-Type": "application/json"})
         with urllib.request.urlopen(req, timeout=10) as resp:

@@ -1,7 +1,7 @@
 """Роутер для приема Webhooks от Telegram бота."""
 import os
 import logging
-from fastapi import APIRouter, Request, BackgroundTasks
+from fastapi import APIRouter, Request, BackgroundTasks, HTTPException
 
 import telegram_bot
 
@@ -12,6 +12,13 @@ logger = logging.getLogger(__name__)
 @router.post("/webhook", response_model=dict)
 async def telegram_webhook(request: Request, background_tasks: BackgroundTasks) -> dict:
     """Принимает обновления от Telegram (WebHook)."""
+    expected_secret = os.getenv("WEBHOOK_SECRET_TOKEN")
+    if expected_secret:
+        received_secret = request.headers.get("X-Telegram-Bot-Api-Secret-Token")
+        if received_secret != expected_secret:
+            logger.warning("Unauthorized webhook access attempt")
+            raise HTTPException(status_code=403, detail="Invalid secret token")
+
     try:
         update = await request.json()
         
