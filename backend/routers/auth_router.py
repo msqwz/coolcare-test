@@ -34,7 +34,7 @@ def send_sms_code(request: schemas.PhoneLoginRequest) -> dict:
         except Exception as e:
             logger.error(f"Failed to send auth code via Telegram: {e}")
 
-    return {"message": "Code sent", "phone": phone, "debug_code": code}
+    return {"message": "Code sent", "phone": phone}
 
 
 @router.post("/verify-code", response_model=schemas.Token)
