@@ -50,8 +50,9 @@ async def lifespan(app: FastAPI):
         
     try:
         from telegram_bot import setup_webhook
-        # Используем основной домен для вебхуков
-        setup_webhook("https://plus-cool.ru")
+        # Используем переменные окружения для гибкости
+        webhook_url = os.getenv("WEBHOOK_URL", "https://plus-cool.ru")
+        setup_webhook(webhook_url)
     except Exception as e:
         print(f"⚠️  Error setting up Telegram webhook: {e}")
         
@@ -105,7 +106,13 @@ def serve_spa(dist_dir: str, full_path: str):
         raise HTTPException(status_code=500, detail="Build directory not found")
 
     clean_path = full_path.strip("/")
-    file_path = os.path.join(dist_dir, clean_path)
+    # Защита от Path Traversal
+    file_path = os.path.normpath(os.path.join(dist_dir, clean_path))
+    
+    # Проверка, что путь не выходит за пределы dist_dir
+    if not file_path.startswith(os.path.normpath(dist_dir)):
+        logger.warning(f"SECURITY: Attempted path traversal: {clean_path}")
+        raise HTTPException(status_code=403, detail="Forbidden")
 
     if os.path.isfile(file_path):
         return FileResponse(file_path)
@@ -113,15 +120,6 @@ def serve_spa(dist_dir: str, full_path: str):
     is_asset = "." in clean_path or clean_path.startswith("assets/")
 
     if is_asset:
-        try:
-            files = os.listdir(dist_dir)
-            logger.warning(f"Asset NOT FOUND: {file_path}. Files in {dist_dir}: {files}")
-            if os.path.exists(os.path.join(dist_dir, "assets")):
-                asset_files = os.listdir(os.path.join(dist_dir, "assets"))
-                logger.warning(f"Files in {dist_dir}/assets: {asset_files}")
-        except Exception as e:
-            logger.error(f"Error listing directory {dist_dir}: {e}")
-
         raise HTTPException(status_code=404, detail=f"Asset {clean_path} not found")
 
     index_path = os.path.join(dist_dir, "index.html")

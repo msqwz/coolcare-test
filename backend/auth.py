@@ -13,7 +13,9 @@ from schemas import TokenData
 load_dotenv()
 
 # === Настройки ===
-SECRET_KEY = os.getenv("JWT_SECRET", "super_secret_key_change_in_production")
+SECRET_KEY = os.getenv("JWT_SECRET")
+if not SECRET_KEY:
+    raise RuntimeError("JWT_SECRET environment variable is not set!")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_HOURS = int(os.getenv("JWT_EXPIRE_HOURS", "24"))
 

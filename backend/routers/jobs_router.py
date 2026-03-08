@@ -2,7 +2,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from typing import List, Optional
 from datetime import datetime, date, timezone
-from database import supabase
+from database import supabase, supabase_admin
 import schemas
 import auth
 
@@ -172,7 +172,7 @@ def update_job(
         for field in ["price", "status"]:
             if field in update_data and str(update_data[field]) != str(original_job.get(field)):
                 try:
-                    supabase.table("job_audit_logs").insert({
+                    supabase_admin.table("job_audit_logs").insert({
                         "job_id": job_id,
                         "user_id": current_user["id"],
                         "field_name": field,

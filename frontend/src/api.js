@@ -44,7 +44,17 @@ export const api = {
     
     if (!response.ok) {
       const error = await response.json().catch(() => ({ detail: 'Request failed' }))
-      throw new Error(error.detail || 'Request failed')
+      let errorMessage = error.detail || 'Request failed'
+      
+      if (Array.isArray(error.detail)) {
+        errorMessage = error.detail
+          .map(err => `${err.loc.join('.')}: ${err.msg}`)
+          .join('; ')
+      } else if (typeof error.detail === 'object') {
+        errorMessage = JSON.stringify(error.detail)
+      }
+      
+      throw new Error(errorMessage)
     }
     return response.json()
   },
