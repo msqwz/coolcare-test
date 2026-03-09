@@ -75,25 +75,33 @@
 /* Фильтры по статусу */
 .filter-bar {
     display: flex;
-    gap: 6px;
-    margin-bottom: 12px;
+    gap: 8px;
+    margin: 0 -16px 14px -16px; /* Выход за пределы боковых отступов контейнера (16px) */
+    padding: 2px 16px 8px 16px; /* Возвращаем выравнивание первому элементу */
     flex-wrap: nowrap;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
-    padding-bottom: 4px;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.filter-bar::-webkit-scrollbar {
+    display: none; /* Hide scrollbar Chrome/Safari */
 }
 
 .filter-bar button {
     background: var(--card-bg);
     border: 1px solid var(--border-color);
-    padding: 8px 14px;
-    border-radius: 16px;
-    font-size: 0.75rem;
+    padding: 8px 16px;
+    border-radius: 12px;
+    font-size: 0.8rem;
     cursor: pointer;
     transition: all 0.2s;
-    font-weight: 400;
+    font-weight: 500;
     white-space: nowrap;
     flex-shrink: 0;
+    scroll-snap-align: start;
 }
 
 .filter-bar button.active {
