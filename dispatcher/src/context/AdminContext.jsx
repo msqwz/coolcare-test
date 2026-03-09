@@ -53,40 +53,29 @@ export function AdminProvider({ children }) {
         if (user) {
             loadData()
 
-            // Real-time updates via Supabase
-            const channel = supabase
-                .channel('admin-updates')
-                .on(
-                    'postgres_changes',
-                    { event: '*', schema: 'public', table: 'jobs' },
-                    (payload) => {
-                        console.log('Real-time job update:', payload)
-                        if (payload.eventType === 'INSERT') {
-                            setJobs(prev => [payload.new, ...prev])
-                        } else if (payload.eventType === 'UPDATE') {
-                            setJobs(prev => prev.map(j => j.id === payload.new.id ? payload.new : j))
-                        } else if (payload.eventType === 'DELETE') {
-                            setJobs(prev => prev.filter(j => j.id === payload.old.id))
-                        }
-                    }
-                )
-                .on(
-                    'postgres_changes',
-                    { event: '*', schema: 'public', table: 'users' },
-                    (payload) => {
-                        console.log('Real-time user update:', payload)
-                        if (payload.eventType === 'UPDATE') {
-                            setWorkers(prev => prev.map(w => w.id === payload.new.id ? payload.new : w))
-                        } else if (payload.eventType === 'INSERT') {
-                            setWorkers(prev => [payload.new, ...prev])
-                        }
-                    }
-                )
-                .subscribe()
+            // HTTP Polling (Fallback for removed Supabase Realtime anonymity)
+            const pollId = setInterval(async () => {
+                try {
+                    const [s, j, w] = await Promise.all([
+                        api.getAdminStats(),
+                        api.getAllJobs(0, JOBS_LIMIT),
+                        api.getWorkers()
+                    ])
+                    setStats(s)
+                    setWorkers(w)
+                    setJobs(prev => {
+                        const updatedMap = new Map(j.map(job => [job.id, job]))
+                        const newBase = prev.map(job => updatedMap.has(job.id) ? updatedMap.get(job.id) : job)
+                        const prevIds = new Set(prev.map(job => job.id))
+                        const completelyNew = j.filter(job => !prevIds.has(job.id))
+                        return [...completelyNew, ...newBase]
+                    })
+                } catch (e) {
+                    console.error('Автоматическое обновление данных не удалось:', e)
+                }
+            }, 10000) // Опрашиваем каждые 10 секунд
 
-            return () => {
-                supabase.removeChannel(channel)
-            }
+            return () => clearInterval(pollId)
         }
     }, [user, loadData])
 
